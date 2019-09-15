@@ -1,0 +1,3 @@
+(ns cas.utils)
+
+(def alert js/alert)
