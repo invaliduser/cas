@@ -9,7 +9,8 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
-                 [rum "0.11.3"]]
+                 [rum "0.11.4"]
+                 [org.clojure/core.async "0.7.559"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
@@ -38,7 +39,8 @@
                            :optimizations :none
                            :install-deps true
                            :npm-deps {:react "16.9.0"
-                                      :react-mathjax "1.0.1"}
+                                      :react-mathjax "1.0.1"
+                                      :react-draggable "4.2.0"}
                            
 
                            

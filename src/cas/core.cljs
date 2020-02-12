@@ -2,7 +2,8 @@
   (:require [cas.utils :refer [parse compile evaluate simplify alert]]
             [cas.math :refer [->equation tex]]
             [rum.core :as rum]
-            [cas.comps]))
+            [cas.comps]
+            [cas.keys :refer [refresh-listeners]]))
 
 
 (set! *warn-on-infer* true)
@@ -30,3 +31,4 @@
 (rum/mount (cas.comps/main-comp) (js/document.querySelector "#app"))
 
 #_(alert (simplify  "3+2+11"))
+(refresh-listeners)

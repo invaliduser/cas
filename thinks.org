@@ -1,0 +1,40 @@
+
+* DONE "crazy toolbox" is what we want
+
+* DONE live rendering of current, and live-rendering of doc, and
+
+
+
+* DONE maintain history of expressions/equations
+
+* TODO thumbnails of history
+
+* TODO save hw @ every point
+
+
+
+
+* disp the tree, disp the latex
+
+
+
+* DONE right side a doc editor, goes straight to latex
+
+
+* TODO I mean, the ideal would be some weird combo of paredit and a viz tool
+
+
+* core operations that you'd want to do:
+** replace-exp
+** doto-exp
+
+** do-to both sides
+** certain simplifications
+** "do opposite" of exp---given x+8=15, you'd want to operate on +8 and get x=7
+
+
+** distribute
+** combine terms
+** break a term up (is this necessary, given replace?)
+** undo
+** write eq

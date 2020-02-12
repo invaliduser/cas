@@ -1,8 +1,8 @@
 (ns cas.shorthand)
 
-
 ;macros for convenience
-(defmacro pull-in [libname [fnsyms]]
-  (for [fnsym fnsyms]
-    (let [jsified (symbol (str ".-" fnsym))])
-    `(def ~fnsym (jsified js/math))))
+(defmacro pull-in [libname fnsyms]
+  `(do
+     ~@(for [fnsym fnsyms]
+         (do
+           `(def ~fnsym (~(symbol (str ".-" fnsym)) ~libname))))))

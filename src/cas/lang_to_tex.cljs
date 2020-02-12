@@ -6,7 +6,8 @@
     (let [total-terms  (-> operands count (* 2) dec)]
       (apply str (take total-terms (interleave operands (repeat op)) )))))
 
-(def fns {:+ (gen-fn-for-commutative-infix "+")
+(def fns {:= (fn [f s] (str f "=" s))
+          :+ (gen-fn-for-commutative-infix "+")
           :* (gen-fn-for-commutative-infix "*")
           :- (fn [f s]
                (str f "-" s))
@@ -16,7 +17,29 @@
           :frac (fn [f s]
                   (str "\\frac{" f "}{" s "}"))})
 
-(defn compile-to-tex [form]
+(def nkw-fns (zipmap (map name (keys fns)) (vals fns)))
+
+(def operator?
+  #{\+
+    \=
+    \-
+    \*
+    \/})
+
+(defn compile-to-tex-legacy [form] ;only takes operators in keyword form, could maybe be changed
+  (cond (vector? form)
+        (let [results (for [item form]
+                        (compile-to-tex-legacy item))]
+          (apply (first results) (rest results)))
+
+        (number? form)
+        form
+
+        (keyword? form)
+        (fns form)))
+
+
+(defn compile-to-tex [form] ;deprecated? relies on 
   (cond (vector? form)
         (let [results (for [item form]
                         (compile-to-tex item))]
@@ -25,5 +48,6 @@
         (number? form)
         form
 
-        (keyword? form)
-        (form fns)))
+        (operator? form)
+        (nkw-fns form)))
+

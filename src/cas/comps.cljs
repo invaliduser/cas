@@ -2,11 +2,16 @@
   (:require [rum.core :as rum]
             [cas.utils :refer [parse compile evaluate simplify alert]]
             [cas.lang-to-tex]
-            #_[cljsjs.react]
-            #_react-mathjax))
+            [cas.comps.board :as board]
+            [cljs.tools.reader.edn]
+            [cas.tex-render]
+            ))
 
-(defn render-tex [tex]
-  (.tex2svg js/MathJax tex))
+
+'(#_[cljsjs.react]
+    #_react-mathjax)
+
+
 
 
 (def inp (atom "2+2"))
@@ -29,7 +34,7 @@
                :on-change (fn [e] (reset! atm (.. e -target -value)))}]])
 
 (rum/defc rendered-mathjax < rum/reactive [atm]
-  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (rum/react atm)))}}])
+  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (cas.tex-render/render-tex (rum/react atm)))}}])
 
 
 (rum/defc loader [atm]
@@ -72,12 +77,6 @@
 (rum/defc tex-display < rum/reactive []
   [:div (rum/react texified)])
 
-
-
-
-
-
-
 (def eq-rendered (rendered-mathjax eq-atom))
 
 
@@ -100,7 +99,7 @@
 ;prolly need to get legit mathjax or latex.js to make this an actually good author env, but...
   [:div {:dangerouslySetInnerHTML {:__html
                                     (-> (rum/react hw-atom)
-                                        render-tex
+                                        cas.tex-render/render-tex
                                         (.-outerHTML))}}])
 
 
@@ -116,7 +115,7 @@
                                                (let [parsed (cljs.tools.reader.edn/read-string n)];just makes data structures, shouldn't feel squeamish 'bout giving this its own atom
                                                  ;we're using the edn reader, but we most likely want to switch to a parser that doesn't freak out at 5x or similar
                                                  
-                                                 (reset! manipulang-tex-atm (cas.lang-to-tex/compile-to-tex parsed)))
+                                                 (reset! manipulang-tex-atm (cas.lang-to-tex/compile-to-tex-legacy parsed)))
                                                (catch js/Error e  "a-ha...I just need $50"))))
 
 (rum/defc manipulang-tex-sausage < rum/reactive []
@@ -129,22 +128,36 @@
 (def rendered-manipulang  (rendered-mathjax manipulang-tex-atm))
 
 
+(def toogle (atom true))
 
+(rum/defc main-comp < rum/reactive []
+  [:div {:height "100%"}
+   [:div
+    [:input {:type "button" :on-click #(swap! toogle not) :value "Toggle between board and bench"}]
+    [:span (str "  Current value: " (if (rum/react toogle) "board" "bench" ))]
+    [:hr]]
+   (if (rum/react toogle)
+     (board/backdrop)
+     [:div#first
+      [:div   [:div "uses three atoms: inp, parsed, texified"]
+       (loader inp)
+       [:div "tex:" (tex-display)]
+       (rendered-mathjax texified)
+       [:hr]]
 
-(rum/defc main-comp []
-  [:div
-   (loader inp)
-   [:div "tex:" (tex-display)]
-   (rendered-mathjax texified)
-   (record-current texified "add-to-hw")
-   (equation-loader)
-   (record-current eq-atom "add-to-hw")
-   (eq-watch)
-   eq-rendered
-   hw-disp
-   (rendered-hw)
-   [:div "manipulang-edit"]
-   (manipulang-edit)
-   [:div "manipulang-tex"]
-   (manipulang-tex-sausage)
-   rendered-manipulang])
+      [:div
+       (record-current texified "add-to-hw")
+       (equation-loader)
+       (record-current eq-atom "add-to-hw")
+       (eq-watch)
+       eq-rendered
+       [:div "unrendered contents of hw-atom:"]
+       hw-disp
+       (rendered-hw)
+       [:hr]]
+
+      [:div   [:div "manipulang-edit"]
+       (manipulang-edit)
+       [:div "manipulang-tex"]
+       (manipulang-tex-sausage)
+       rendered-manipulang]])])

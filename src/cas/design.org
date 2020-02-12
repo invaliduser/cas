@@ -1,0 +1,103 @@
+* differentiators:
+ - tree based
+ - GAME UI
+ - a focus on speed., feeling of power
+ - tutorial
+ - infix input
+ - tree navigation---want to actively teach and reward hotkey use
+ - minor, minor comp algebra
+ - but...done badly
+ - compensated for with really, really freaking good authoring/editing
+ - both are really important.  People's options for writing math are TERRIBLE:  latex, random emacs modes...plus and equals are on the same key!
+ - seriously, authoring absolutely sucks
+ - think how much you hate writing in things that aren't emacs
+ - that's the level of power you're going for
+ - treat math like a game.  hold their hand.  Your job isn't to teach them, it's to get them done w/their homework.
+
+ - computer keyboards are meant for typing letters
+ - that makes the math experience REALLY SUCK
+ - but if you replace those hotkeys...
+ - to an extent this would all probably be more straightforward in elisp lol
+ 
+ - convenience features for homework: numbering, etc.
+ - indexed help
+
+
+
+* fuzziness; if they get it "wrong," should work with it anyway---right<->down, left<->up
+
+
+* harir 
+** start with cowboy editing---w/e you type replaces
+
+* easy hotkey assign (by me, not user yet)
+
+
+
+
+* authoring, editing, 
+** editing GREAT WISDOMS HERE  
+*** i am pro-mode? 
+
+*** edit-mode and write-mode
+**** maybe different names, maybe not even letters as hotkeys (\)
+
+*** thoughts from nat
+dirtier/more tree focused
+
+must remain comprehensible at base, everything else is on top of that
+u, rather than creating some special ui, just replaces current node w/^, moves old current node down one, and changes author focus to 2nd
+
+2eu
+
+selectors on trees like selectors in css
+
+keep authoring and editing very simple (in the Hickey sense)
+
+
+
+
+*** this is the meat.  this is what you want to be best at.
+*** few keystrokes, power, a small amount of abstraction/meta
+*** but aim for apl over lisp
+*** this is the sort of thing that you discover by playing with
+*** you must make the user feel like a superhero from day 1
+*** we're only listening for keydown events right now
+*** goog.events has keypress, keydown, keyup
+*** https://keycode.info/
+*** we can distinguish between lcontrol and rcontrol (and shifts) 
+*** https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+*** keypress is deprecated
+
+* collapse, display (mini*latex! holy crap!)
+* undo...if we go reframe we get this for free, might be worth.  latex pipeline first tho
+* tree operations
+
+
+* when allowing user-written fns, allow cljs or js; turn into js datastructures, then back into cljs, before/after js fns run
+
+0    0,z
+1    on
+2    tw
+3    th
+4    fo
+5    fi
+6    si
+7    se
+8    ei
+9    ni
+10   te
+
+* ;multiple layers of abstraction; stuff like this for authoring, but much 
+much much more power when working with trees
+; BUTTLOAD OF USER SUPPORT is the point.  This is an apl, not an emacs or lisp
+; meant to be mastered and requiring learning, but specifically *not* to be customizeable
+; users should know there's an end
+; to that end the first experience must be AMAZING
+
+sl - select left side of equation
+key chords, plentiful documentation, easily adjustable documentation
+
+If Lyx is Lisp, make this python or apl---not as powerful, but made for normies and efficient at it
+
+https://www.reddit.com/r/emacs/comments/97dl18/my_adventures_in_emacsifying_the_browser/
