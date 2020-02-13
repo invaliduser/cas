@@ -49,5 +49,8 @@
         form
 
         (operator? form)
-        (nkw-fns form)))
+        (nkw-fns form)
+
+        (string? form)
+        (js/parseInt form)))
 

@@ -2,19 +2,11 @@
   (:require [goog.events :as events]
             [cljs.core.async :refer [chan <! >! go]]
             [cas.chans :refer [key-chan]]
-            [cas.state :refer [mode]]
-            )
+            [cas.state :refer [mode was-write-mode-before? highlight-atom]]
+            [cas.tree-ops :refer [reset-at-path! append-at-path!]]
+            [cas.manipulang :refer [digits letters]])
   (:import [goog.events KeyHandler]
            [goog.events.EventType]))
-
-
-(def digits
-  #{\1 \2 \3 \4 \5 \6 \7 \8 \9 \0})
-
-
-(def letters
-  #{\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z })
-
 
 
 
@@ -50,6 +42,8 @@
     
     (if (= k \\)
       (let [new-mode (case @mode :write :edit :edit :write)]
+        (if (= new-mode :write)
+          (reset! was-write-mode-before? false))
         (reset! mode new-mode)
         (println "setting to " new-mode " mode")))
 
@@ -63,8 +57,14 @@
         (js/console.log (str k " pressed, no action associated...")))
 
 
-      :write
-      :default
+      :write ;getting into write mode is a one-time thing,
+      (cond (digits k)
+            (if @was-write-mode-before?
+              (append-at-path! @highlight-atom k)
+              (do (reset-at-path! @highlight-atom k)
+                  (reset! was-write-mode-before? true))))
+
+      :default nil
       
       )))
 

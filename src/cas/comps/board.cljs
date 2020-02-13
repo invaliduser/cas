@@ -6,7 +6,7 @@
             [cas.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to-tex :refer [compile-to-tex]]
-            [cas.state :refer [mode tree-atom tex]]
+            [cas.state :refer [mode tree-atom tex highlight-atom show-paths?]]
             [react]))
 
 (add-watch tree-atom :to-tex (fn [k r o n]
@@ -22,9 +22,15 @@
 
 (rum/defc backdrop < rum/reactive []
   [:div
+   [:span {:on-click #(swap! show-paths? not)}  (str
+                                                 "path"
+                                                 (if (rum/react show-paths?) "(T)" "(F)") ":"
+                                                 (rum/react highlight-atom))]
    (mode-indicator)
    [:hr]
    (easy-tree/atwrap tree-atom)
-   (full-tex-display (compile-to-tex (rum/react tree-atom)))])
+   (full-tex-display (try (compile-to-tex (rum/react tree-atom))
+                          (catch :default e (str e))
+                          ))])
 
 
