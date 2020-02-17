@@ -32,6 +32,9 @@
 ** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
 this will give you all sorts of ideas.  You may end up getting distracted
 but that's ok.
+
+
+
 ** I suspect there's a lot of low-hanging fruit in using the homerow
 
 
@@ -44,6 +47,11 @@ but that's ok.
 * authoring, editing, 
 
 ** authoring
+*** we're looking at a multi-tiered model
+ keystrokes -> strings (even one-letter strings) -> commands -> which affect the actual tree by adding to it
+*** "authoring" sometimes means replacing, or shoving aside and authoring in place
+    
+*** scratch: 
 authoring and editing reinforce each other
 n-> homerow -> numerical input! na -> 1, ns -> 2, all the way through ;
 
@@ -66,7 +74,7 @@ you can look for "key held down" with a combination of keeping track of down and
 
 ;a whole buttload of modes for raw input: if they want to type raw latex, let them
 
-; I'm really liking the idea of taking letter streams to match english
+
 
 ** editing GREAT WISDOMS HERE  
 *** i am pro-mode? 
