@@ -3,10 +3,11 @@
             [cljs.spec.alpha :as spec]
             [clojure.walk :as walk]
             [cas.rein-til :as r-t]
-            [cas.microsoft-directory-tree :as easy-tree]
+            [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to-tex :refer [compile-to-tex]]
             [cas.state :refer [mode tree-atom tex highlight-atom show-paths?]]
+            [cas.comps.keylang :refer [key-stream-display]]
             [react]))
 
 (add-watch tree-atom :to-tex (fn [k r o n]
@@ -29,6 +30,7 @@
    (mode-indicator)
    [:hr]
    (easy-tree/atwrap tree-atom)
+   (key-stream-display)
    (full-tex-display (try (compile-to-tex (rum/react tree-atom))
                           (catch :default e (str e))
                           ))])

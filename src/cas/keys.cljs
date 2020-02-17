@@ -2,7 +2,7 @@
   (:require [goog.events :as events]
             [cljs.core.async :refer [chan <! >! go]]
             [cas.chans :refer [key-chan]]
-            [cas.state :refer [mode was-write-mode-before? highlight-atom]]
+            [cas.state :refer [mode was-write-mode-before? highlight-atom keystream]]
             [cas.tree-ops :refer [reset-at-path! append-at-path!]]
             [cas.manipulang :refer [digits letters]])
   (:import [goog.events KeyHandler]
@@ -36,6 +36,7 @@
 
 (defn key-down-listener [ev]
   (let [k (.-key ev)]
+    (swap! keystream conj k)
     (reset! last-key ev)
 
     (println "pressed " k " in " @mode " mode")
@@ -51,6 +52,7 @@
 
     (case @mode
       :edit
+
       (if-let [v (hotkeys-map k)]
         (do (js/console.log (name v))
             (go (>! key-chan v)))
@@ -58,7 +60,8 @@
 
 
       :write ;getting into write mode is a one-time thing,
-      (cond (digits k)
+      (cond (and (not (.-ctrlKey ev))
+                 (digits k))
             (if @was-write-mode-before?
               (append-at-path! @highlight-atom k)
               (do (reset-at-path! @highlight-atom k)

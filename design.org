@@ -29,28 +29,78 @@
 
 * harir 
 ** start with cowboy editing---w/e you type replaces
+** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
+this will give you all sorts of ideas.  You may end up getting distracted
+but that's ok.
+** I suspect there's a lot of low-hanging fruit in using the homerow
+
+
+
 
 * easy hotkey assign (by me, not user yet)
 
 
 
-
 * authoring, editing, 
+
+** authoring
+authoring and editing reinforce each other
+n-> homerow -> numerical input! na -> 1, ns -> 2, all the way through ;
+
+the authoring is just SUPER important, you must preserve the "playing around" aspect
+they should NEVER feel trapped
+
+and remember:  because authoring is the FIRST thing they run into, has to be super good
+ - though it *can* require some investment if you want; you can get some minutes of learning
+out of them and bring them up gradually through a tutorial
+
+between ctrl, shift and alt, you have a lot of keys to work with
+
+letters of note: xyz t fg s n
+Mathtalk: https://mathtalk.com/mathtalk-commands-voicing-calculus/
+
+repeats!:   z -> 0, zz -> z.  e-> =, ee-> e
+shift-key or something to open parens...mathtalk did "function foxtrot" and it
+automatically created f() with cursor in the parens
+you can look for "key held down" with a combination of keeping track of down and up events
+
+;a whole buttload of modes for raw input: if they want to type raw latex, let them
+
+; I'm really liking the idea of taking letter streams to match english
+
 ** editing GREAT WISDOMS HERE  
 *** i am pro-mode? 
 
 *** edit-mode and write-mode
 **** maybe different names, maybe not even letters as hotkeys (\)
 
+
 *** thoughts from nat
 dirtier/more tree focused
 
 must remain comprehensible at base, everything else is on top of that
-u, rather than creating some special ui, just replaces current node w/^, moves old current node down one, and changes author focus to 2nd
+^ or u, rather than creating some special ui, just replaces current node w/^, moves old current node down one, and changes author focus to 2nd
+
+
+
+need to parse/interpret streams of keystrokes
+also expansion/abbreviation
 
 2eu
 
+also must be able to take math symbols not on the keyboard, likely through Latex: \int, \sigma.  maybe doable through hotkeys, but...
+really I'd work on the basic algebra flow right now.  How quickly can you write 0 = 4x^2 + 4x + 1?  (2x+ 1) (2x + 1)
+
+authoring needs to be FAST, as does editing
+lots of "tricks" in the parser:  letter followed by a 2 should take it as a "squared"
+but a lot of focus on the tree nature as well; doing things "manually" should be almost as good
+
+
+
+
 selectors on trees like selectors in css
+
+
 
 keep authoring and editing very simple (in the Hickey sense)
 
@@ -61,6 +111,9 @@ keep authoring and editing very simple (in the Hickey sense)
 *** few keystrokes, power, a small amount of abstraction/meta
 *** but aim for apl over lisp
 *** this is the sort of thing that you discover by playing with
+*** can override browser shortcuts:
+          (do (.stopPropagation ev)
+              (.preventDefault ev))
 *** you must make the user feel like a superhero from day 1
 *** we're only listening for keydown events right now
 *** goog.events has keypress, keydown, keyup
@@ -76,7 +129,7 @@ keep authoring and editing very simple (in the Hickey sense)
 
 * when allowing user-written fns, allow cljs or js; turn into js datastructures, then back into cljs, before/after js fns run
 
-0    0,z
+0    0,z  
 1    on
 2    tw
 3    th
@@ -101,3 +154,12 @@ key chords, plentiful documentation, easily adjustable documentation
 If Lyx is Lisp, make this python or apl---not as powerful, but made for normies and efficient at it
 
 https://www.reddit.com/r/emacs/comments/97dl18/my_adventures_in_emacsifying_the_browser/
+
+
+ypexsoys
+
+applicative lang
+
+
+what about stack-based, f'real tho?
+

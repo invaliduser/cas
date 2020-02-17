@@ -28,7 +28,7 @@
             )))
 
 
-(defmacro dt [ & terms]
+(defmacro dt [& terms]
   (->> terms
        first
        str
@@ -36,3 +36,5 @@
        symbol
        (conj (rest terms))))
 ; i don't really remember what the goal of this is lol...I think I can just add the "." myself...maybe polymorphism?
+
+

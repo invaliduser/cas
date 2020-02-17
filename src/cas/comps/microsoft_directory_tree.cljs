@@ -1,4 +1,4 @@
-(ns cas.microsoft-directory-tree
+(ns cas.comps.microsoft-directory-tree
   (:require [rum.core :as rum]
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
