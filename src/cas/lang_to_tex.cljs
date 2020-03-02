@@ -13,7 +13,7 @@
                (str f "-" s))
           :/  (fn [f s]
                (str f "/" s))
-          
+          :exp (fn [f s] (str f "^{" s"}"))
           :frac (fn [f s]
                   (str "\\frac{" f "}{" s "}"))})
 
@@ -52,5 +52,11 @@
         (nkw-fns form)
 
         (string? form)
-        (js/parseInt form)))
+        (cond #_(= form "cursor")
+              
+              
+              :else (let [inted (js/parseInt form)]
+                      (if (js/isNaN inted)
+                        form
+                        inted)))))
 

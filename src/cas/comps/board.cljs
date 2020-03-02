@@ -11,7 +11,9 @@
             [react]))
 
 (add-watch tree-atom :to-tex (fn [k r o n]
-                           (reset! tex (compile-to-tex n)))) ;this might be a case for reframe...
+                               (reset! tex (try (compile-to-tex n)
+                                                (catch :default e (str e))
+                                                )))) ;this might be a case for reframe...
 
 
 (rum/defc full-tex-display < rum/reactive []
@@ -31,8 +33,6 @@
    [:hr]
    (easy-tree/atwrap tree-atom)
    (key-stream-display)
-   (full-tex-display (try (compile-to-tex (rum/react tree-atom))
-                          (catch :default e (str e))
-                          ))])
+   (full-tex-display (rum/react tex))])
 
 

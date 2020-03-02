@@ -1,3 +1,43 @@
+* ugh
+https://www.axsoft.co/
+http://equalx.sourceforge.net/
+https://www.mathicando.com/index.html?features (esp!)
+http://mathquill.com/ -> open source
+http://www.wiris.com/mathtype big focus on word processing?
+https://math-editor.com/semanticEditorDemo.html <- the russians, softaria
+
+* honorable mention
+https://github.com/johnbcoughlin/calctex
+
+* 
+you know, everyone and their dog has one of these, but they STILL ALL SUCK
+like it was depressing finding all of these, but none of them actually fix the problem
+
+they're made for students, not power users
+power users are assumed to be using LaTeX
+
+
+
+
+* 
+literally just authoring that doesn't make me type + or - or * ^ don't make me leave the home row
+and that lets me edit with something like the power of paredit
+
+I do like the idea of selected + fn -> parens around, not-selected -> empty, places cursor
+also escape-up, that puts cursor outside the current nest level
+
+and maybe bind-as?
+
+
+honestly paredit and emacs bindings are as big a part of this as anything else
+Ctrl-space, Alt-F, Alt-R, Alt-S, Ctrl-G
+
+sorry guys, but editing math expressions is editing trees, and paredit is the best for editing trees
+
+a selection that can serve as a fn definition consists of a node and all children, and exceptions
+you can have multiple selections
+
+
 * differentiators:
  - tree based
  - GAME UI
@@ -28,6 +68,7 @@
 
 
 * harir 
+** need a concept of "cursor"
 ** start with cowboy editing---w/e you type replaces
 ** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
 this will give you all sorts of ideas.  You may end up getting distracted

@@ -35,9 +35,11 @@
 
 
 (defn key-down-listener [ev]
+  (reset! last-key ev)
   (let [k (.-key ev)]
-    (swap! keystream conj k)
-    (reset! last-key ev)
+    (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
+      (swap! keystream conj k))
+
 
     (println "pressed " k " in " @mode " mode")
     

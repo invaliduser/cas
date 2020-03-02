@@ -10,7 +10,8 @@
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
                  [rum "0.11.4"]
-                 [org.clojure/core.async "0.7.559"]]
+                 [org.clojure/core.async "0.7.559"]
+                 [automat "0.2.4"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
