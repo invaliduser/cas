@@ -11,7 +11,9 @@
                  [org.clojure/core.async  "0.4.500"]
                  [rum "0.11.4"]
                  [org.clojure/core.async "0.7.559"]
-                 [automat "0.2.4"]]
+                 [automat "0.2.4"]
+                 [instaparse "1.4.10"]
+                 ]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
@@ -105,6 +107,6 @@
                    
                    ;; need to add dev source path here to get user.clj loaded
                    :source-paths ["src" "dev"]
-                   ;; need to add the compliled assets to the :clean-targets
+                   ;; need to add the compiled assets to the :clean-targets
                    :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                                      :target-path]}})

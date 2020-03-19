@@ -15,16 +15,14 @@
                (str f "/" s))
           :exp (fn [f s] (str f "^{" s"}"))
           :frac (fn [f s]
-                  (str "\\frac{" f "}{" s "}"))})
+                  (str "\\frac{" f "}{" s "}"))
+          :prime (fn [item] (str item "^{\\prime}"))
+          })
 
 (def nkw-fns (zipmap (map name (keys fns)) (vals fns)))
 
 (def operator?
-  #{\+
-    \=
-    \-
-    \*
-    \/})
+  (set (keys nkw-fns)))
 
 (defn compile-to-tex-legacy [form] ;only takes operators in keyword form, could maybe be changed
   (cond (vector? form)

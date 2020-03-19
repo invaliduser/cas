@@ -4,6 +4,13 @@
 (def stack (atom '()))
 
 (def input-stream (atom '()))
+
+(def output (atom []))
+
+                                        ;duh!   precedence doesn't matter when EVALUATING stacks; it's building them
+                                        ;which is why there are operator-precedence PARSERS
+
+;
 (reset! input-stream '(1 2 "-"))
 
 (def fns {"+" {:arity 2 :rfn +}
