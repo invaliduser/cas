@@ -1,6 +1,5 @@
 (ns cas.core
   (:require [cas.utils :refer [parse compile evaluate simplify alert]]
-            [cas.math :refer [->equation tex]]
             [rum.core :as rum]
             [cas.comps]
             [cas.keys :refer [refresh-listeners]]))

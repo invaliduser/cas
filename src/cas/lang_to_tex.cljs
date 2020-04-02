@@ -1,4 +1,6 @@
-(ns cas.lang-to-tex)
+(ns cas.lang-to-tex
+  (:require [clojure.string :as stri])
+  )
 
 
 (defn gen-fn-for-commutative-infix [op]
@@ -7,8 +9,19 @@
       (apply str (take total-terms (interleave operands (repeat op)) )))))
 
 (def fns {:= (fn [f s] (str f "=" s))
-          :+ (gen-fn-for-commutative-infix "+")
-          :* (gen-fn-for-commutative-infix "*")
+
+          :paren (fn [item] (str "(" item ")"))
+          :plus (fn [item] (str "+" item))
+          :minus (fn [item] (str "-" item))
+          :sum (fn [uno & others]
+                 (apply str (if (= (first uno) "+")
+                              (stri/replace-first uno #"\+" "")
+                              uno)
+                        others))
+
+          
+                                        ;          :+ (gen-fn-for-commutative-infix "+")
+;          :* (gen-fn-for-commutative-infix "*")
           :- (fn [f s]
                (str f "-" s))
           :/  (fn [f s]
@@ -22,22 +35,9 @@
 (def nkw-fns (zipmap (map name (keys fns)) (vals fns)))
 
 (def operator?
-  (set (keys nkw-fns)))
+  (set (keys fns)))
 
-(defn compile-to-tex-legacy [form] ;only takes operators in keyword form, could maybe be changed
-  (cond (vector? form)
-        (let [results (for [item form]
-                        (compile-to-tex-legacy item))]
-          (apply (first results) (rest results)))
-
-        (number? form)
-        form
-
-        (keyword? form)
-        (fns form)))
-
-
-(defn compile-to-tex [form] ;deprecated? relies on 
+(defn compile-to-tex [form]
   (cond (vector? form)
         (let [results (for [item form]
                         (compile-to-tex item))]
@@ -47,7 +47,7 @@
         form
 
         (operator? form)
-        (nkw-fns form)
+        (fns form)
 
         (string? form)
         (cond #_(= form "cursor")

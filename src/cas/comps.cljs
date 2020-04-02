@@ -115,7 +115,7 @@
                                                (let [parsed (cljs.tools.reader.edn/read-string n)];just makes data structures, shouldn't feel squeamish 'bout giving this its own atom
                                                  ;we're using the edn reader, but we most likely want to switch to a parser that doesn't freak out at 5x or similar
                                                  
-                                                 (reset! manipulang-tex-atm (cas.lang-to-tex/compile-to-tex-legacy parsed)))
+                                                 (reset! manipulang-tex-atm (cas.lang-to-tex/compile-to-tex parsed)))
                                                (catch js/Error e  "a-ha...I just need $50"))))
 
 (rum/defc manipulang-tex-sausage < rum/reactive []

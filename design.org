@@ -1,3 +1,16 @@
+
+* harir 
+** TODO IMMEDIATELY:  create a pipeline from authoring-> rendering
+*** this will put you onto updating lang->tex
+** need a concept of "cursor"
+** start with cowboy editing---w/e you type replaces
+** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
+this will give you all sorts of ideas.  You may end up getting distracted
+but that's ok.
+
+
+
+** I suspect there's a lot of low-hanging fruit in using the homerow
 * ugh
 https://www.axsoft.co/
 http://equalx.sourceforge.net/
@@ -65,18 +78,6 @@ you can have multiple selections
 
 
 * fuzziness; if they get it "wrong," should work with it anyway---right<->down, left<->up
-
-
-* harir 
-** need a concept of "cursor"
-** start with cowboy editing---w/e you type replaces
-** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
-this will give you all sorts of ideas.  You may end up getting distracted
-but that's ok.
-
-
-
-** I suspect there's a lot of low-hanging fruit in using the homerow
 
 
 
@@ -212,3 +213,49 @@ applicative lang
 
 what about stack-based, f'real tho?
 
+
+
+* implicit multiplication
+** ugh
+** apply to vars, nums, and close-parens?
+** gets worse when you have something like x^2 * y,
+*** which would be written as xsqy (fine) or xexp2y (not fine)
+*** the trick is there seem to be different orders of operations involved
+*** you can maybe deal w/this by using different types for terms?
+
+
+
+couple things: don't be afraid to have the user use modes or other hoops to make parsing easier
+the focus should be on consistency and power more than anything.
+
+so things like v+letter -> 
+
+
+are we making this too hard?
+
+no, I don't think so, we need to be getting some structure anyway if we want to allow for manipulation
+
+we have to be careful about "manipulation," though, we want to enable *structural* stuff, don't want to do the actual calculation for them
+which makes authoring even MORE important, but again "important" doesn't mean "easy to do everything for the newcomer"
+
+where we do want some program awareness of what we're working on is for typesetting and keeping the datastructure clear
+
+In other words, we don't want to do any thinking for the user, but we don't want THEM to have to do any thinking for US either.
+
+We shouldn't be inferior to a piece of paper!
+
+easy navigation---wasd and ijkl
+
+they SHOULD know about the expression tree, it should be their friend, they should understand it
+
+actually this is important stuff---
+
+it shouldn't be smart enough to, say, "multiply everything in this expression by 5," ---they should do that---
+
+but it should know that deleting [:plus 2] from [:sum [:plus 2] [:plus 3]] just yields 3
+
+v. minor programming should be encouraged, a la keyboard macros, etc
+
+What to work on now?
+
+Let the user loop be your guide: so, right now, it's connecting authoring to rendering

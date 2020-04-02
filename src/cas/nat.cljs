@@ -1,4 +1,6 @@
 (ns nat.cljs)
+;should probably keep this around and move keylang.cljs into it
+
                                         ;experimental lang for really easy typing of math
 
 

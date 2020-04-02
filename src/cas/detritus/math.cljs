@@ -1,6 +1,8 @@
-(ns cas.math
+(ns cas.detritus.math
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as cljstr]))
+
+;I *think* this can be thrown away or at least ignored? Though the idea of reverse-engineering type from structure isn't a bad one...
 
 (s/def ::right #(cljstr/includes? (.-type %) "Node"))
 (s/def ::left  #(cljstr/includes? (.-type %) "Node"))
