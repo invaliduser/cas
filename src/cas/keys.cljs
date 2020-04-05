@@ -1,10 +1,12 @@
 (ns cas.keys
   (:require [goog.events :as events]
+            [rum.core :as rum]
             [cljs.core.async :refer [chan <! >! go]]
             [cas.chans :refer [key-chan]]
-            [cas.state :refer [mode was-write-mode-before? highlight-atom keystream]]
-            [cas.tree-ops :refer [reset-at-path! append-at-path!]]
-            [cas.manipulang :refer [digits letters]])
+            [cas.state :refer [mode was-write-mode-before? highlight-atom keystream keystream-undecided last-key keylang-input]]
+            [cas.tree-ops :refer [reset-at-path! append-at-path! full-reset-at-path!]]
+            [cas.manipulang :refer [digits letters]]
+            [cas.nat :refer [full]])
   (:import [goog.events KeyHandler]
            [goog.events.EventType]))
 
@@ -31,7 +33,13 @@
    "i" :integral
    "=" :equal})
 
-(def last-key (atom nil))
+
+(rum/defc key-stream-display < rum/reactive []
+  [:div {:style {:text-align "center" :font-size 24} :on-click #(reset! keystream '())}
+   [:span "resolved here"]
+   [:br]
+   [:span {:style { }} (apply str (interpose " " (rum/react keystream)))]
+   [:div {:style { }} (apply str "stack:" (interpose " " (rum/react keystream-undecided)))]])
 
 
 (defn key-down-listener [ev]
@@ -62,9 +70,13 @@
 
 
       :write ;getting into write mode is a one-time thing,
-      (cond (and (not (.-ctrlKey ev))
-                 (digits k))
+      (cond (not (.-ctrlKey ev))
             (if @was-write-mode-before?
+              (do (swap! keylang-input str k)
+                  (full-reset-at-path! @highlight-atom (full @keylang-input)))
+              (reset! was-write-mode-before? true))
+
+            #_(if @was-write-mode-before?
               (append-at-path! @highlight-atom k)
               (do (reset-at-path! @highlight-atom k)
                   (reset! was-write-mode-before? true))))

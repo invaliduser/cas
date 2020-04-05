@@ -7,7 +7,8 @@
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to-tex :refer [compile-to-tex]]
             [cas.state :refer [mode tree-atom tex highlight-atom show-paths?]]
-            [cas.comps.keylang :refer [key-stream-display]]
+            [cas.keys :refer [key-stream-display]]
+            [cas.nat :refer [combos-display]]
             [react]))
 
 (add-watch tree-atom :to-tex (fn [k r o n]
@@ -32,7 +33,9 @@
    (mode-indicator)
    [:hr]
    (easy-tree/atwrap tree-atom)
+   (full-tex-display (rum/react tex))
+   (combos-display)
    (key-stream-display)
-   (full-tex-display (rum/react tex))])
+])
 
 

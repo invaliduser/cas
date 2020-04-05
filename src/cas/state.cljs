@@ -17,5 +17,13 @@
 (def show-paths? (atom false))
 
 (def keystream (atom '[]))
+(def keystream-tokenized (atom []))
+(def keystream-resolved-tokens)
+
 (def keystream-results (atom '[]))
 (def keystream-undecided (atom '[]))
+
+
+(def last-key (atom nil))
+(def keylang-input (atom ""))
+

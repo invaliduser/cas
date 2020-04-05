@@ -26,7 +26,11 @@
   (mapv inc (rest our-path)))
 
 (defn tree-get [t p]
-  (get-in t (real-path p)))
+  (let [rp (real-path p)]
+    (if (= rp [])
+      t
+      (get-in t (real-path p)))))
+
 
 (defn reset-node [node v]
   (if (vector? node)
@@ -39,10 +43,22 @@
    (apply f node args)))
 
 (defn reset-at-path! [p v]
-  (swap! tree-atom update-in (real-path p) reset-node v))
+  (let [rp (real-path p)]
+    (if (= rp [])
+      (swap! tree-atom reset-node v)
+      (swap! tree-atom update-in rp reset-node v))))
+
+(defn full-reset-at-path! [p v]
+  (let [rp (real-path p)]
+    (if (= rp [])
+      (reset! tree-atom v)
+      (swap! tree-atom assoc-in rp v))))
 
 (defn update-at-path! [p f & args]
-  (swap! tree-atom update-in (real-path p) #(apply update-node % f args)))
+  (let [rp (real-path p)]
+    (if (= rp [])
+      (swap! tree-atom  #(apply update-node % f args))
+      (swap! tree-atom update-in (real-path p) #(apply update-node % f args)))))
 
 (defn append-at-path! [p v]
   (update-at-path! p (comp js/parseInt str) v))
