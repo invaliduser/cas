@@ -1,7 +1,8 @@
 
 * harir 
-** TODO IMMEDIATELY:  create a pipeline from authoring-> rendering
-*** this will put you onto updating lang->tex
+** TODO: create more sensible scheme/flow between edit/auth, more organized flow for keyboad events
+
+
 ** need a concept of "cursor"
 ** start with cowboy editing---w/e you type replaces
 ** fail fast:  start by speeding up just the *input* 0=4x^2 + 4x +1
