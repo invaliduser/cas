@@ -12,7 +12,6 @@
 
 
 
-
 (def hotkeys-map
   {"p" "+"
    ;"w" :start-write-mode
@@ -42,13 +41,11 @@
    [:div {:style { }} (apply str "stack:" (interpose " " (rum/react keystream-undecided)))]])
 
 
+
+
 (defn key-down-listener [ev]
   (reset! last-key ev)
   (let [k (.-key ev)]
-    (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
-      (swap! keystream conj k))
-
-
     (println "pressed " k " in " @mode " mode")
     
     (if (= k \\)
@@ -56,34 +53,32 @@
         (if (= new-mode :write)
           (reset! was-write-mode-before? false))
         (reset! mode new-mode)
-        (println "setting to " new-mode " mode")))
+        (println "setting to " new-mode " mode"))
 
+      (do (case @mode
+            :edit
 
+            (if-let [v (hotkeys-map k)]
+              (do (js/console.log (name v))
+                  (go (>! key-chan v)))
+              (js/console.log (str k " pressed, no action associated...")))
 
-    (case @mode
-      :edit
+            :write              ;getting into write mode is a one-time thing,
+            (cond (not (.-ctrlKey ev))
+                  (if @was-write-mode-before?
+                    (do (swap! keylang-input str k)
+                        (full-reset-at-path! @highlight-atom (full @keylang-input)))
+                    (reset! was-write-mode-before? true))
 
-      (if-let [v (hotkeys-map k)]
-        (do (js/console.log (name v))
-            (go (>! key-chan v)))
-        (js/console.log (str k " pressed, no action associated...")))
+                  #_(if @was-write-mode-before?
+                      (append-at-path! @highlight-atom k)
+                      (do (reset-at-path! @highlight-atom k)
+                          (reset! was-write-mode-before? true))))
+            :default nil)
 
-
-      :write ;getting into write mode is a one-time thing,
-      (cond (not (.-ctrlKey ev))
-            (if @was-write-mode-before?
-              (do (swap! keylang-input str k)
-                  (full-reset-at-path! @highlight-atom (full @keylang-input)))
-              (reset! was-write-mode-before? true))
-
-            #_(if @was-write-mode-before?
-              (append-at-path! @highlight-atom k)
-              (do (reset-at-path! @highlight-atom k)
-                  (reset! was-write-mode-before? true))))
-
-      :default nil
-      
-      )))
+          
+          (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
+            (swap! keystream conj k))))))
 
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)

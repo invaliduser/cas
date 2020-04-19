@@ -16,6 +16,8 @@
 (def highlight-atom (atom [0]))
 (def show-paths? (atom false))
 
+(def highlight-atom-2 (atom nil))
+
 (def keystream (atom '[]))
 (def keystream-tokenized (atom []))
 (def keystream-resolved-tokens)

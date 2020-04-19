@@ -31,6 +31,33 @@
       t
       (get-in t (real-path p)))))
 
+(defn query-get  ;the goal is for this to replace tree-get
+                                        ;this will perhaps not be hard, as tree-get is used only in comments apparently
+  "takes a path, and returns the item(s) at that location
+
+The last item is special."
+  [path tree]
+  (let [special (last path)]
+    (cond (number? special)
+	(get-in tree path)
+
+      :else
+      (let [cr (if (< (count path) 2)
+                 tree
+                (get-in tree (drop-last path)))] ;contextual-root
+
+        (cond (vector? special)
+              (subvec cr (first special) (inc (last special)))
+
+              (= :children special) 
+              (subvec cr 1)
+
+              (= special :all)
+              tree)))))
+
+
+
+
 
 (defn reset-node [node v]
   (if (vector? node)

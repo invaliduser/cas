@@ -194,7 +194,6 @@
                                         ;caution: paren may have TWO precedences? one as implicit multiplier/fn call, one as grouping?
                 ;ANYTHING inside parens has higher precedence than out
                 :parselet (fn [[op & remainder]]
-
                             (println "op: " op)
                             (println "remainder: " remainder)
                             (loop [product [:paren]
@@ -361,7 +360,7 @@
 
 (defn iparse [token-vec]  ;interface parse
   (-> token-vec
-      (mparse 0)
+      (mparse  0 #_(precedence (first token-vec)))
       :parsed))
 
 (defn full [s]

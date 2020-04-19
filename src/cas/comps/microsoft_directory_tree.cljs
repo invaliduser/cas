@@ -7,13 +7,39 @@
             [cas.chans :refer [key-chan action-interpreter]]))
 
 
+(defn matches-path? [node-path highlight-path]
+  (let [cn (count node-path)
+        ch (count highlight-path)] ;move highlight-path out so not calculated in render
+
+    (or
+                                        ;parent is highlighted
+     (and (> cn ch)
+          (= (subvec node-path 0 ch) highlight-path))
+                                        ;parent is not highlighted but has :children
+     (and (= cn ch)
+          (= (subvec node-path 0 (dec cn))
+             (subvec highlight-path 0 (dec cn)))
+          (= (last highlight-path) :children))
+                                        ;:all
+     (= node-path [:all]))))
+
+
+
 (rum/defcs node-comp < rum/reactive [state node path]
   (let [content (-> node node-val str)]
     #_[:span {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex node))}}]
 
     [:span {:style {:margin-left (* 10 (count path))}
             :on-click #(reset! highlight-atom path)} 
-     (if (= path (rum/react highlight-atom)) [:mark content] content)
+     (if
+
+         (matches-path? path (rum/react highlight-atom))
+         #_(= path (rum/react highlight-atom))
+
+
+       [:mark content]
+
+       content)
      (if (rum/react show-paths?) (str "|" path))
      #_(str (tree-get @tree-atom path) #_(= node-val (get-in @tree-atom path)))]))
 
@@ -43,6 +69,11 @@
 
 (defn right! []
   (swap! highlight-atom doto-last inc))
+
+(defn children! []
+  (swap! highlight-atom conj :children))
+
+
 
 (action-interpreter "tree-manip" {:left left!
                                   :right right!

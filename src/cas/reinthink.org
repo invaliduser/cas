@@ -1,0 +1,69 @@
+keys
+
+;what you're looking for is CONCEPTUAL hierarchy more than anything
+
+[mode-switch-button\
+ [edit [arrow-keys navigation]
+  write  [backspace letters]
+  ]]
+
+
+
+ - reingold-tilford
+
+
+conceptual journey
+http://dirk.jivas.de/papers/buchheim02improving.pdf
+
+
+ - naive reingold tilford
+  - recursive bottom up, after drawing subtrees of a node, shift them right
+    as necessary, then center parent over children
+
+(walk/postwalk (let [a (atom 0)]
+            (fn [form]
+              {:first-child (if (vector? form)
+                              ["child" (form 0)]
+                              nil) :form form}))
+	      ["=" ["+" 2 3 4] ["-" 999  ["+" 992 2]]])
+
+
+
+(defn draw-children [tree]
+
+(defn naive-rein-til [tree]
+  (-> tree draw-children shift)
+
+ * shift is the quadratic part---requires:
+  - finding the shift amount (requires traversal)
+  - actually changing the x coords (also requires traversal)
+
+for the shift, compare right contours of left subtrees to left contours of left subtrees
+  number of comparisons is linear!
+
+the problem, though, is traversals.  For this threads exist
+
+threads have to be updated whenever two subtrees are combined
+
+thread is just leftmost (rightmost) child, or given by thread
+thread is only for childless
+
+for actually changing the positions, each node gets a value called *mod*
+when you "move" a subtree, you just update mod of its root
+mod doesn't actually apply to its node, but to the children of the node
+
+"Real position" of a node is given by its prelim. x + sum of mods of parents back to tree root
+
+INCEPTION/INTERACTION
+The thing is, for contour/collision detection, we need the *real* positions of the contour nodes.  But b/c of the mod stuff we don't have them yet
+
+But we do have modsum.  So *leaf nodes*, which may have threads, have a modifier
+attached as well.  This value is
+ modsum(leafnode) - modsum (thread-destination-node)
+
+
+WALKER
+
+So Rein/Til was originally made for *binary* trees.  It can be extended to trees of higher degree, but naive extension piles smaller interior subtrees to the left
+
+Walker came up w/some mods to rein/til to fix this, but they're not as performant as he thought
