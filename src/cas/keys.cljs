@@ -13,22 +13,22 @@
 
 
 (def hotkeys-map
-  {"p" "+"
+  {
    ;"w" :start-write-mode
 ;   "e" :start-edit-mode
-   "m" "-"
-   "t" "*"
-   "f" "/" ;?
    "o" :open
    "c" :close
-   "r" :record
+   "s" :snapshot
    ;"m" :minimize
-   
+
+   "Backspace" :delete
+   "p" :surround-with-parens
+   "r" :replace-with-authoring
+   "d" :treat-as-argument-to ;"doto"
    "ArrowRight" :right
    "ArrowLeft" :left
    "ArrowUp" :up
    "ArrowDown" :down
-   "d" :down
    "i" :integral
    "=" :equal})
 

@@ -12,7 +12,7 @@
             [react]))
 
 (add-watch tree-atom :to-tex (fn [k r o n]
-                               (reset! tex (try (compile-to-tex n)
+                               (reset! tex (try (compile-to-tex (first n))
                                                 (catch :default e (str e))
                                                 )))) ;this might be a case for reframe...
 

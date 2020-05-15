@@ -1,15 +1,14 @@
 (ns cas.state
   (:require [cas.test-data]
-            [cas.lang-to-tex :refer [compile-to-tex]]
-            ))
+            [cas.lang-to-tex :refer [compile-to-tex]]))
 
 (def mode (atom :edit)) ;:edit and :tree for now
 
-
+(def all-real-path (atom false))
 
 (def tree-atom (atom cas.test-data/default-data))
 (def tex (atom ""))
-(reset! tex (compile-to-tex @tree-atom))
+(reset! tex (compile-to-tex (first @tree-atom)))
 
 (def was-write-mode-before? (atom false))
 
