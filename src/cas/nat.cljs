@@ -1,8 +1,8 @@
 (ns cas.nat ;parser for two/three-letter codes
   (:require [rum.core :as rum]
-            [cas.state :as state :refer [keystream keystream-results keylang-input keystream-tokenized keystream-undecided highlight-atom]]
             [cas.tree-ops :refer [reset-at-path!]]
             [clojure.string :as cs]
+            [cas.utils :refer [letters]]
             [cas.shorthand :as sh]))
 
                                         ;TODO:  make cmds longer than two letteres recognizeable
@@ -23,14 +23,9 @@
 ;you DO want some term discrimination; 2a2b should split out into 2a * 2b, and 5a(a+b) should work out as [:term [:term 5 "a"] [:paren [:sum [:plus "a"] [:plus "b"]]]]
 
 
-(rum/defc combos-display < rum/reactive []
-  (let [ktoke (rum/react keystream-tokenized)]
-    [:div {:style {:text-align "center" :font-size 24} :on-click #(reset! keystream '())}
-     [:span {:style { }} (if (seq ktoke)
-                           (apply str "tokenized: " (interpose " " ktoke)))]]))
 
 
-(def letters #{\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z})
+
 
 
 (def num-codes
@@ -225,15 +220,12 @@
 
 
 (defn signifies-multiplication? [ppe nt]  ;parsed-previous-exp next-token
-  (sh/debug ppe)
-  (sh/debug nt)
-
   (try
     (case ppe
       :number (#{:variable :open-paren } nt)
       :variable (#{:variable :open-paren } nt)
       :paren (#{:variable :number :open-paren } nt)
-      :exponent (#{:variable :number :open-paren} nt)
+      :exponent (#{:variable :number :open-paren} nt); this is probably wrong
       )
     (catch js/Error e (do (sh/debug ppe)
                           (sh/debug nt)))
@@ -378,15 +370,13 @@
                             num-map (zipmap ["on" "tw" "th" "fo" "fi" "si" "se" "ei" "ni" "te"] (range 1 11)) 
 
                             numerical? (fn [toke]
-                                         (or
-                                          (= :number (get-type toke))
-                                          (= toke ".")))
+                                         (= :number (get-type toke)))
 
                             n-string (fn [token]
                                        (cond (number? token)
                                              (str token)
 
-                                             (re-matches #"[0-9]" token)
+                                             (re-matches #"[0-9]+" token)
                                              token
 
                                              (num-codes token)
@@ -485,6 +475,7 @@
 
 
 (defn mparse [[token & remainder :as s] prec-val]
+  (println "running mparse!")
   (if token
     (let [parser (get-parser token)
           state (parser s)]    ;first, parse "once" according to type of first token
@@ -503,7 +494,7 @@
 (defn full [s]
   (-> s tokenize iparse))
 
-(add-watch keylang-input :tokenize (fn [k r o n] (reset! keystream-tokenized (tokenize n))));todo move this somewhere 
+;todo move this somewhere 
 
 
 ["x" "sq" "eq" "y" "sq"] ; the "goal parsed structure" here would be [:eq [:sq \x] [:sq \y]]
@@ -515,48 +506,6 @@
 
 
 
-#_(def str-commands
-  {:fn (fn [s]
-         (cond
-           (re-find #"^[a-z]$" s)
-           (reset-at-path! @highlight-atom s)
-           )
-         )
-   :strs (concat
-          ["eq"
-           "pr"
-           "pl"
-           "mi"
-           "sq"
-           "ov"
-           "cl"]
-          (map str letters))}  )
-
-
-#_(def token-pattern  (re-pattern  (str "(" (apply str  (interpose \| (:strs str-commands))) ")$")))
-
-
-#_(add-watch keystream :to-undecided (fn [k r o n]
-                                     (swap! keystream-undecided conj (last n))
-                                     (let [proposed-str (apply str @keystream-undecided)
-                                           
-                                           pattern-test (re-find token-pattern  proposed-str )]
-
-                                       (println "matched?:"  token-pattern ": " proposed-str ":" pattern-test)
-                                       (println pattern-test)
-                                       (if pattern-test
-                                         (let [match (first pattern-test)
-                                               c (count match)]
-                                           (println "match:" match)
-                                           ((:fn str-commands) match)
-                                           (println "count:" c)
-                                           (swap! keystream-undecided (comp vec (partial drop-last c))))))))
-
-
-
-
-#_(re-find token-pattern "akjdldfpr")
-;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 
 ;foxsp ofxpon
 

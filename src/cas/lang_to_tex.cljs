@@ -32,9 +32,11 @@
           :frac (fn [f s]
                   (str "\\frac{" f "}{" s "}"))
           :prime (fn [item] (str item "^{\\prime}"))
-          })
+          :term (fn [& items] (apply str items))})
+
 
 (def nkw-fns (zipmap (map name (keys fns)) (vals fns)))
+
 
 (def operator?
   (set (keys fns)))

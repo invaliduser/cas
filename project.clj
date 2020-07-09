@@ -14,6 +14,8 @@
                  [org.clojure/core.async "0.7.559"]
                  [automat "0.2.4"]
                  [instaparse "1.4.10"]
+                 [com.taoensso/tufte "2.1.0"];https://github.com/ptaoussanis/tufte
+                 
                  ]
 
   :plugins [[lein-figwheel "0.5.19"]

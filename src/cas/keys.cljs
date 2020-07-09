@@ -6,9 +6,13 @@
             [cas.state :refer [mode was-write-mode-before? highlight-atom keystream keystream-undecided last-key keylang-input]]
             [cas.tree-ops :refer [reset-at-path! append-at-path! full-reset-at-path!]]
             [cas.manipulang :refer [digits letters]]
-            [cas.nat :refer [full]])
+            [cas.nat :refer [full]]
+            [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]
+            [cas.shorthand :as sh])
   (:import [goog.events KeyHandler]
-           [goog.events.EventType]))
+           [goog.events.EventType]
+           
+           ))
 
 
 
@@ -41,11 +45,30 @@
    [:div {:style { }} (apply str "stack:" (interpose " " (rum/react keystream-undecided)))]])
 
 
+(def tokenizeable-keys "All keys that can be tokenized."
+  (set (concat u-letters letters digit-strings operator-strings)))
+
+(defn tokenizeable-key-handler [handler atm]
+  (fn [ev]
+    (let [k (sh/debug (.-key ev))]
+      
+      (if (sh/debug (or (text-edit!-keys k)
+                                 (tokenizeable-keys k)))
+        (case k
+          "Backspace"
+          (swap! atm #(.slice % 0 -1))
+          (swap! atm str k))
+        (handler ev)))))
+
 
 
 (defn key-down-listener [ev]
   (reset! last-key ev)
   (let [k (.-key ev)]
+
+    ((tokenizeable-key-handler identity (cas.state/atom-map "tokenize-material"))
+     ev)
+#_#_    
     (println "pressed " k " in " @mode " mode")
     
     (if (= k \\)

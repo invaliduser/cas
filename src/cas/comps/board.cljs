@@ -5,10 +5,15 @@
             [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to-tex :refer [compile-to-tex]]
-            [cas.state :refer [mode tree-atom tex highlight-atom show-paths?]]
+            [cas.state :refer [mode tree-atom tex highlight-atom show-paths? roadmap atom-map]]
             [cas.keys :refer [key-stream-display]]
-            [cas.nat :refer [combos-display] :as nat]
             [react]))
+
+(def tokenized-style
+    [:div {:style {:text-align "center" :font-size 24} #_#_:on-click #(reset! keystream '())}
+     [:span {:style { }} #_(if (seq ktoke)
+                           (apply str "tokenized: " (interpose " " ktoke)))]])
+
 
 (add-watch tree-atom :to-tex (fn [k r o n]
                                (reset! tex (try (compile-to-tex (first n))
@@ -17,45 +22,18 @@
 
 
 (rum/defc full-tex-display < rum/reactive [tex-atom]
-  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (rum/react tex-atom)))}}])
+  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (or (rum/react tex-atom) "")))}}])
 
 (rum/defc mode-indicator < rum/reactive []
   [:span (str (rum/react mode) "-mode")])
 
-(let [c (atom 0)]
-  (defn key-gen []
-    (swap! c inc)
-    (-> @c str keyword)))
 
-(defn over [f a]
-  (let [r-atom (atom nil)]
-    (add-watch a (key-gen) (fn [k r o n]
-                             (reset! r-atom (f @a))))
-    r-atom))
 
-(def roadmap [{:name "tokenize-material"}
 
-              {:name "tokenized"
-               :f nat/tokenize}
-
-              {:name "parsed"
-               :f nat/iparse}
-
-              {:name "compiled-to-tex"
-               :f compile-to-tex}])
-
-(defn connect-roadmap! [rm]
-  (first (reduce (fn [[m last-key] v]
-                   [(assoc m (:name v) (if last-key (over (:f v) (m last-key))
-                                           (atom nil)))
-                     (:name v)])
-                 [{} nil] rm)))
-
-(defonce atom-map (connect-roadmap! roadmap))
 
 (rum/defc render-roadmap < rum/reactive [rm]
-  [:div (for [{ename :name :as entry} roadmap]
-          [:div
+  [:div (for [{ename :name :as entry} rm]
+          [:div {:key (:k entry)}
            [:div [:label ename]]
            [:div [:pre [:code (str (rum/react (atom-map ename)))]]]])])
 
@@ -74,11 +52,33 @@
    [:hr]
 
    (render-roadmap roadmap)
+   (full-tex-display (atom-map "compiled-to-tex"))
 
-   #_#_#_#_   (easy-tree/atwrap tree-atom)
+
+   (comment @tree-atom @(atom-map "parsed"))
+   #_#_#_#_(easy-tree/atwrap (atom-map "parsed")) 
+
+   (easy-tree/atwrap tree-atom)  
    (full-tex-display tex)
-   (combos-display)
    (key-stream-display)
 ])
 
 
+
+                                        ;big.
+                                        ;toggleable, independent, "views" into the pipeline
+                                        ;keystream---no
+                                        ;what's being tokenized, how it's being tokenized---yes
+
+                                        ;a manipulang view --- yes, but a very *friendly* one, hopefully 
+                                        ;a latex view ---definitely
+
+
+
+                                        ;another starting point is a state trunk
+                                        ;don't work on this yet, but make the above components flexible so they can accept from any source
+
+                                        ;and the other good starting point is input/keys/event management
+
+
+                                        ;but before anything else, bridge the gap to latex
