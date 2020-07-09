@@ -1,6 +1,6 @@
 (ns cas.comps
   (:require [rum.core :as rum]
-            [cas.utils :refer [parse compile evaluate simplify alert]]
+            [cas.utils :refer [alert parse]]
             [cas.lang-to-tex]
             [cas.comps.board :as board]
             [cljs.tools.reader.edn]
@@ -18,7 +18,7 @@
 (def parsed (atom "2+2"))
 (def texified (atom ""))
 
-(add-watch inp :parse-and-update (fn [k r o n]
+#_(add-watch inp :parse-and-update (fn [k r o n]  ;TODO what parse was I referring to?make work
                                    (reset! parsed (parse n))))
 
 (add-watch parsed :texify-and-update (fn [k r o n]
@@ -56,7 +56,7 @@
   (str (:left m) "=" (:right m)))
 
 
-(doseq [[nom ke] [[left-side :left]
+#_(doseq [[nom ke] [[left-side :left]
                   [right-side :right]]]
  (add-watch nom :texify-and-update (fn [k r o n]
                                      (let [tex (-> n parse (.toTex))]
@@ -138,6 +138,8 @@
     [:hr]]
    (if (rum/react toogle)
      (board/backdrop)
+
+
      [:div#first
       [:div   [:div "uses three atoms: inp, parsed, texified"]
        (loader inp)
@@ -156,8 +158,11 @@
        (rendered-hw)
        [:hr]]
 
-      [:div   [:div "manipulang-edit"]
+      [:div
+       [:div "manipulang-edit"]
        (manipulang-edit)
+
        [:div "manipulang-tex"]
        (manipulang-tex-sausage)
+
        rendered-manipulang]])])

@@ -3,9 +3,24 @@
             [cas.state :as state :refer [keystream keystream-results keylang-input keystream-tokenized keystream-undecided highlight-atom]]
             [cas.tree-ops :refer [reset-at-path!]]
             [clojure.string :as cs]
-))
+            [cas.shorthand :as sh]))
+
+                                        ;TODO:  make cmds longer than two letteres recognizeable
+;make square, prime, etc. function as terms
+;ability to parse variables
+
+                                        ;design notes: multiple structures, right?
+
+                                        ; typed -> structured manipulang, manipulang -> latex
+                                        ;also, they will be manipulating manipulang
+
+                                        ;exponents: ideally you'd just accept one term: aexp5bexp5->  (a^5) * b^5
+                                        ;but with terms it gets more complicated ---that could also be a^(5b)^5
+                                        ;i think best you can do is implicitly add a ( and expect them to close it
+                                        ;you can use hotkeys perhaps, like :downarrow, not always necessary for them to hit "cl"
 
 
+;you DO want some term discrimination; 2a2b should split out into 2a * 2b, and 5a(a+b) should work out as [:term [:term 5 "a"] [:paren [:sum [:plus "a"] [:plus "b"]]]]
 
 
 (rum/defc combos-display < rum/reactive []
@@ -30,6 +45,12 @@
     "ni"
     "te"})
 
+(def var-letters
+  (set (map (partial str \v) letters)))
+
+(defn unmark-var [v]
+  (second v))
+
 (def test-str "ypreqxsqovysq") ;y pr eq x sq ov y sq ;y'=(x^2)/(y^2)
 (def cmds  (set (concat
                  num-codes
@@ -40,10 +61,12 @@
                   "ti"
                   "dby"
                   "sq"
+                  "cu"
+                  "exp"
                   "ov"
                   "cl" ;open/close parens
                   "op"]
-                 (map (partial str \v) letters))))
+                 var-letters)))
 
 
 
@@ -76,7 +99,9 @@
        (set)))
 
 (defn no-bigger-ones [item]
-  (not (list-of-cmds-that-are-stubs item)))
+  (not (get-in index (apply vector item)))
+
+  #_(not (list-of-cmds-that-are-stubs item)))
 
 (def digit? #{\0 \1 \2 \3 \4 \5 \6 \7 \8 \9})
 (def digits? (partial re-matches #"[0-9]+"))
@@ -93,7 +118,6 @@
   (let [reducer (fn [[tokens uc] item] ;under-consideration
 
                   (let [maybe? (str uc item)]
-                    
                     (cond (= "" item)
                           (if (not= "" uc)
                             [(conj tokens uc) ""]
@@ -145,21 +169,27 @@
 
 (defn get-type [token]
   (cond
+    (keyword? token)
+    token
+    
+    (vector? token)
+    (first token)
+    
     (#{"op" "("} token)
     :open-paren 
     
     (#{"cl" ")"} token)
     :close-paren
 
+
+    (var-letters token)
+    :variable
+
     (or (num-codes token)
         (number? token)
         (and (string? token)
              (numerical? token)))
     :number
-
-    (and (string? token)
-         (= (count token) 1))
-    :variable
 
     (#{"eq"} token)
     :comparison
@@ -176,6 +206,10 @@
     (#{"sq" "exp" "cu"} token)
     :exponent
 
+    (and (string? token)
+         (= (count token) 1))
+    :variable
+
     (and (str token) (= 1 (count token)))
     :name))
 
@@ -185,152 +219,257 @@
 (declare mparse)
 
 (declare precedence)
+(declare get-parser)
+
+(defn parse-term [term])
+
+
+(defn signifies-multiplication? [ppe nt]  ;parsed-previous-exp next-token
+  (sh/debug ppe)
+  (sh/debug nt)
+
+  (try
+    (case ppe
+      :number (#{:variable :open-paren } nt)
+      :variable (#{:variable :open-paren } nt)
+      :paren (#{:variable :number :open-paren } nt)
+      :exponent (#{:variable :number :open-paren} nt)
+      )
+    (catch js/Error e (do (sh/debug ppe)
+                          (sh/debug nt)))
+    )
+
+  )
+
+(defn finish-as-term [r t remainder] ;result type 
+#_#_#_  (sh/debug r)
+  (sh/debug t)
+  (sh/debug remainder)
+  (if (signifies-multiplication? t (get-type (first remainder)))
+    ((get-parser :term) r remainder)
+    {:parsed r
+     :remaining remainder}))
+
+
+(defn is? [t item]
+  (= t (get-type item)))
 
 (def types-data
   ;TODO so making :sum and :product return vectors of pairs was good, but something is glitching because of that, likely because other things aren't ready to get them
   
-  {:open-paren {:precedence 1   ;TODO: if left isn't an operator, return a larger [:term] node.
+  {:close-paren {:precedence -1
+                 :parselet (fn [& args] #_[left more #_[op & remainder]]
+                             (println "close-paren parselet args: " args)
+                             (throw "close-paren parselet was called! This should never happen!")
+                             #_#_#_(sh/debug left)
+                             (sh/debug more)
 
-                                        ;caution: paren may have TWO precedences? one as implicit multiplier/fn call, one as grouping?
-                ;ANYTHING inside parens has higher precedence than out
+                             {:parsed left
+                              :remaining remainder})}
+
+  ; the trick is to rely on the parser getting bored and putting everything in open-paren
+
+   :open-paren {:precedence 15
                 :parselet (fn [[op & remainder]]
-                            (println "op: " op)
-                            (println "remainder: " remainder)
-                            (loop [product [:paren]
-                                   rem remainder]
-                              (let [item (first rem)]
-                                (cond
-                                  (#{")" "cl"} item)
-                                  {:parsed product
-                                   :remaining (rest rem)}
-                                  
-                                  
-                                  :else
-                                  (let [{:keys [parsed remaining]}  (mparse rem (precedence :open-paren))]
-                                    {:parsed (conj product parsed)
-                                     :remaining remaining} ) ))))}
+#_#_                            (sh/debug op)
+                            (sh/debug remainder)
 
-   :comparison {:precedence 2
+
+                            (let [{:keys [parsed remaining]} (mparse remainder 0)
+                                  [close-paren & remaining] remaining]
+                              
+                              
+                              (finish-as-term [:paren parsed] :paren remaining)))}
+
+
+   :comparison {:precedence 3
                 :parselet (fn [left [token & remainder :as s]]  
                             (let [{:keys [parsed remaining]} (mparse remainder (precedence :comparison))]
                               {:parsed  [:= left parsed]
                                :remaining remaining}))}
    
-   :sum {:precedence 3
+   :sum {:precedence 4
          :parselet
-         (let [plus (fn [item] [:plus item])
+         (let [parse #(mparse % (precedence :sum))
+               plus (fn [item] [:plus item])
                minus (fn [item] [:minus item])
                gen-sum-pair (fn [op item]
-                              ((case op
-                                 "pl" plus
-                                 "mi" minus)
-                               item))]
+                              (case op
+                                "pl" (plus item) 
+                                "mi" (minus item)))]
 
            (fn [left [op & remainder :as s]]  
-             (let [{:keys [parsed remaining]} (mparse remainder (precedence :sum))
+             (let [{:keys [parsed remaining]} (parse remainder)
                    operands [(plus left) (gen-sum-pair op parsed)]]
                
                (loop [operands operands
-                      remaining remaining]
-                 (let [lookahead (first remaining)]
-                   (if (= :sum (get-type lookahead))
-                     (let [{:keys [parsed remaining]} (mparse (rest remaining) (precedence :sum))]
-                       (recur (conj operands (gen-sum-pair lookahead parsed))
-                              remaining))
-                     {:parsed (apply vector :sum operands)
-                      :remaining remaining}))))))}
+                      [lookahead :as remaining] remaining]
+                 (if (is? :sum lookahead)
+                   (let [{:keys [parsed remaining]} (parse (rest remaining))]
+                     (recur (conj operands (gen-sum-pair lookahead parsed))
+                            remaining))
+                   {:parsed (apply vector :sum operands)
+                    :remaining remaining})))))}
    
-   :product  {:precedence 4
+   :product {:precedence 5
               :parselet
               (let [parse #(mparse % (precedence :product))
                     mult (fn [item] [:mult item])
                     dby (fn [item] [:dby item])
-                    gen-sum-pair (fn [op item]
-                                   ((case op
-                                      "ti" mult
-                                      "dby" dby
-                                      "ov" dby)
-                                    item))]
+                    gen-prod-pair (fn [op item]
+                                   (case op
+                                     "ti" (mult item)
+                                     "dby" (dby item)
+                                     "ov" (dby item)))]
 
                 (fn [left [op & remainder :as s]]  
-                  (let [{:keys [parsed remaining]} (mparse remainder (precedence :product))
-                        operands [(mult left) (gen-sum-pair op parsed)]]
+                  (let [{:keys [parsed remaining]} (parse remainder)
+                        operands [(mult left) (gen-prod-pair op parsed)]]
                     
                     (loop [operands operands
-                           remaining remaining]
-                      (let [lookahead (first remaining)]
-                        (if (= :sum (get-type lookahead))
-                          (let [{:keys [parsed remaining]} (mparse (rest remaining) (precedence :product))]
-                            (recur (conj operands (gen-sum-pair lookahead parsed))
-                                   remaining))
-                          {:parsed (apply vector :product operands)
-                           :remaining remaining}))))))}
+                           [lookahead :as remaining] remaining]
 
-   :exponent {:precedence 5
+                      (if (not (is? :product lookahead)) 
+                        {:parsed (apply vector :product operands)
+                         :remaining remaining}
+
+                        (let [{:keys [parsed remaining]} (parse (rest remaining))]
+                          (recur (conj operands (gen-prod-pair lookahead parsed))
+                                 remaining))
+                        
+)))))}
+
+   :term {:precedence 6; should be one higher than :product
+          :parselet (let [mk-term (fn [l & ns]
+                                    (let [reducer (fn [acc v]
+                                                    (if (is? :term v)
+                                                      (into acc (subvec v 1))
+                                                      (conj acc v)))]
+                                      (reduce reducer [:term] (cons l ns))))]
+
+                      (fn [left remainder]  
+                        (let [{:keys [parsed remaining]} (mparse remainder (precedence :term))
+                              pt (get-type parsed) 
+
+                              pt (if (= pt :term)
+                                   (get-type (last parsed))
+                                   pt)
+
+                              n? (signifies-multiplication? pt (get-type (first remaining)))]
+
+                          (if n?
+                            (recur (mk-term left parsed) remaining)
+                            {:parsed (mk-term left parsed)
+                             :remaining remaining}))))}
+
+
+;the term stuff:
+   ;numbers should care about what's immediately ahead
+; if they run into a var , it becomes a term
+; if any of these run into a paren...?
+; Nystrom doesn't cover differentiating between a(b) = a*b vs a(b)= apply a to b
+;one wonders if this is something you handle at the logic layer instead?
+   ; yeah, it has to be.
+
+   ;again, a really good authoring/editing experience trumps relation-awareness
+   ;anyway: numbers!
+   :number {:precedence 9
+            :parselet (let [parse #(mparse % (precedence :number))
+                            num-map (zipmap ["on" "tw" "th" "fo" "fi" "si" "se" "ei" "ni" "te"] (range 1 11)) 
+
+                            numerical? (fn [toke]
+                                         (or
+                                          (= :number (get-type toke))
+                                          (= toke ".")))
+
+                            n-string (fn [token]
+                                       (cond (number? token)
+                                             (str token)
+
+                                             (re-matches #"[0-9]" token)
+                                             token
+
+                                             (num-codes token)
+                                             (str (num-map token))
+
+                                             (= token ".")
+                                             token))
+                            numerify (fn [token]
+                                       (cond
+                                         (number? token)
+                                         token
+                                         
+                                         (num-codes token)
+                                         (num-map token)
+                                         
+                                         (not (string? token))
+                                         (println "hi, type is: " (str (type token )))
+
+                                         (re-matches #".*\..*" token)
+                                         (js/parseFloat token)
+
+                                         :else (js/parseInt token)))]
+
+                        (fn [[token & remainder]]
+                          (let [[further-nums remainder] (split-with numerical? remainder)
+                                num-whole (cons token further-nums)
+                                
+                                n (->> num-whole
+                                       (map n-string)
+                                       (apply str)
+                                       (numerify))]
+
+                            (finish-as-term n :number remainder))))}
+   
+
+   :exponent {:precedence 7
               :parselet (fn [left [op & remainder :as s]]
-                          (cond 
-                            (#{"sq" "cu"} op)
-                            {:parsed (case op
-                                       "sq" [:exp left 2]
-                                       "cu" [:exp left 3])
-                             :remaining remainder}
+                          (let [{:keys [parsed remaining]}
+                                (cond 
+                                  (#{"sq" "cu"} op)
+                                  {:parsed (case op
+                                             "sq" [:exp left 2]
+                                             "cu" [:exp left 3])
+                                   :remaining remainder}
 
-                            (= op "exp")
-                            (-> remainder
-                                (mparse (precedence :exponent))
-                                (update :parsed (partial vector op left)))))}
+                                  (= op "exp")
+                                  (-> remainder
+                                      (mparse 0 #_(precedence :exponent))
+                                      (update :parsed (partial vector :exp left))))]
 
-   :prime {:precedence 6
+                            (finish-as-term parsed :exponent remaining)))}
+
+   :prime {:precedence 8
            :parselet (fn [left [op & remainder :as s]]
-                       {:parsed [op left]
+                       {:parsed [:prime left]
                         :remaining remainder})}
-
-
 
        
    :variable {:precedence 9
               :parselet (fn [[v & remainder]]
-                          {:parsed v
+
+                          (finish-as-term (unmark-var v) :variable remainder)
+
+                          #_{:parsed 'sfjlk
                            :remaining remainder #_(mparse remainder (precedence :variable))})}
 
-   :number {:precedence 9
-            :parselet (fn [[token & remainder]]
-                        {:parsed (cond
-                                   (number? token)
-                                   token
-                                   
-                                   (num-codes token)
-                                   (case token
-                                     "on" 1 ;should move this stuff to lexing
-                                     "tw" 2
-                                     "th" 3
-                                     "fo" 4
-                                     "fi" 5
-                                     "si" 6
-                                     "se" 7
-                                     "ei" 8
-                                     "ni" 9
-                                     "te" 10)
-                                   
-                                   (not (string? token))
-                                   (println "hi, type is: " (str (type token )))
+})
 
-                                   (re-matches #".*\..*" token)
-                                   (js/parseFloat token)
 
-                                   :else (js/parseInt token))
-                         :remaining remainder})}})
 
 
 (defn get-parser [token-or-type]
-  (let [typpe (or (and (keyword? token-or-type) token-or-type)
+  (-> token-or-type get-type types-data :parselet)
+
+  #_(let [typpe (or (and (keyword? token-or-type) token-or-type)
                   (get-type token-or-type))]
-    (-> typpe types-data :parselet)))
+    (-> token-or-type get-type types-data :parselet)))
 
 (defn precedence [token-or-type]
-  (let [typpe (or (and (keyword? token-or-type) token-or-type)
-                  (get-type token-or-type))]
-    (-> typpe types-data :precedence)))
+  (-> token-or-type get-type types-data :precedence)
+  #_(let [typpe (or (and (keyword? token-or-type) token-or-type)
+                    (get-type token-or-type))]
+      (-> token-or-type get-type types-data :precedence)))
 
 #_(defn precedence2 [type] ;should be typifying tokens and using this everywhere, but...
   (-> typpe types-data :precedence))
@@ -344,19 +483,17 @@
 
 ;doing some magic here; note that mparse is called recursively by most parsers, AND has an interior loop
 
+
 (defn mparse [[token & remainder :as s] prec-val]
   (if token
     (let [parser (get-parser token)
-          state (parser s)]
+          state (parser s)]    ;first, parse "once" according to type of first token
 
-      (let [result (loop [{:keys [parsed remaining] :as state} state]
-                     (let [lookahead (first remaining)]
-                       (if (< prec-val (precedence lookahead))
-                            (let [parser (get-parser lookahead)
-                                  state (parser parsed remaining)]
-                              (recur state))
-                            state)))]
-        result))))
+      (loop [{:keys [parsed remaining] :as state} state]  ;then as long as the next operator is higher-precedence, repeatedly parse it first
+        (let [[lookahead] remaining]
+          (if (> (precedence lookahead) prec-val)                                         
+            (recur ((get-parser lookahead) parsed remaining))
+            state))))))                                                      ;then be done
 
 (defn iparse [token-vec]  ;interface parse
   (-> token-vec

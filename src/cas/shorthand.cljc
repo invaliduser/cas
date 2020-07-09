@@ -7,14 +7,26 @@
           (let [jsified (symbol (str ".-" fnsym))]
             `(def ~fnsym (~jsified js/math))))))
 
+(defmacro works? [a]
+  `(println ~a))
+
+(defmacro debug [form]
+  `(let [res# ~form]
+     (println ~(str form) ": "  (str res#))
+     res#))
 
 (defn print-retain [item]
   (println item)
   item)
 
-(defmacro thread-print [arg exps]
+(defmacro print->>
+  [arg exps]
   ~(->> ~arg
         (interleave exps (repeat print-retain))))
+
+(defmacro print-> [arg exps]
+  ~(-> ~arg
+       (interleave exps (repeat print-retain))))
 
 #_(defmacro make-functions-of-methods [methodsyms]
   `(do

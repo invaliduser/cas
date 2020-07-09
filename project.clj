@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
+                 [devcards "0.2.7"]
                  [rum "0.11.4"]
                  [org.clojure/core.async "0.7.559"]
                  [automat "0.2.4"]
@@ -21,7 +22,18 @@
   :source-paths ["src"]
 
   :cljsbuild {:builds
-              [{:id "dev"
+              [#_{:id "devcards-test"
+                :source-paths ["src" "test"]
+                :figwheel {:devcards true
+                           :server-port 3001} ;not working!
+                :compiler {:main runners.browser
+                           :optimizations :none
+                           :asset-path "cljs/tests/out"
+                           :output-dir "resources/public/cljs/tests/out"
+                           :output-to "resources/public/cljs/tests/all-tests.js"
+                           :source-map-timestamp true}}
+
+               {:id "dev"
                 :source-paths ["src"]
                 
                 ;; The presence of a :figwheel configuration here

@@ -1,5 +1,5 @@
 (ns cas.core
-  (:require [cas.utils :refer [parse compile evaluate simplify alert]]
+  (:require [cas.utils :refer [ alert]]
             [rum.core :as rum]
             [cas.comps]
             [cas.keys :refer [refresh-listeners]]))
