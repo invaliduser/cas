@@ -1,0 +1,32 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with C-x C-f and enter text in its buffer.
+
+what SHOULD it be?
+
+selected -> keypress (direct-replace="d"?) -> replace selection
+
+
+- commands:
+  - delete
+  - parenthetize
+  - replace-with-author
+  - treat-as-argument-to
+
+
+but navigation?
+
+[:=
+ [:sum [:plus 2] [:plus 3] [:plus 4]]
+ [:sum [:plus 999] [:minus [:paren [:sum [:plus 988] [:plus 2]]]]]]
+
+down: if vector, moves to first.  otherwise moves to next (nil if not first and not vector)
+children: if vector, selects children.  Otherwise gets next
+right: if vector, gets parent and gets inced child.  if first, goes up a level then behaves as the vector case.  If not a vector and not first, acts like vector case
+up: if vector, gets first child of parent.  If first, gets parent.  If not vector and not first, gets first of parent
+left: if idx =0, go up until idx >1, then set to 1. 
+      if idx = 1, go up until idx >1, then set to 1.
+      if idx >1, dec idx
+
+
+can we move entirely to real-path?
+like, can we change matches-path

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/css.css" rel="stylesheet" type="text/css">
+
+    <!-- Tell mobile browsers we're optimized for them and they don't need to
+         crop the viewport. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://journal.stuffwithstuff.com/rss.xml">
+    <link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="http://journal.stuffwithstuff.com/atom.xml">
+    <link rel="stylesheet" href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/style.css" type="text/css">
+
+    <link href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/font-awesome.css" rel="stylesheet">
+
+    <title>
+      Pratt Parsers: Expression Parsing Made Easy
+      
+        – journal.stuffwithstuff.com
+      
+    </title>
+  <script type="text/javascript" async="" src="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/embed.js"></script><link rel="prefetch" as="style" href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a_data/lounge.css"><link rel="prefetch" as="script" href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a_data/common.js"><link rel="prefetch" as="script" href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a_data/lounge.js"><link rel="prefetch" as="script" href="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a_data_005/config.js"></head>
+  <body>
+    <div class="column">
+      
+<article>
+<header>
+<h1>
+  <a href="http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/" rel="bookmark" title="Permanent Link to Pratt Parsers: Expression Parsing Made Easy">
+    Pratt Parsers: Expression Parsing Made Easy
+  </a>
+</h1>
+
+  <a class="older" href="http://journal.stuffwithstuff.com/2011/02/13/extending-syntax-from-within-a-language/" title="Older Post “Extending Syntax from Within a Language”">↩</a>
+
+
+  <a class="newer" href="http://journal.stuffwithstuff.com/2011/04/21/multimethods-multiple-inheritance-multiawesome/" title="Newer Post “Multimethods, Multiple Inheritance, Multiawesome!”">↪</a>
+
+</header>
+<h4><a href="http://journal.stuffwithstuff.com/archive">March 19, 2011</a>
+    <span class="tags"><a href="http://journal.stuffwithstuff.com/category/code">code</a> <a href="http://journal.stuffwithstuff.com/category/java">java</a> <a href="http://journal.stuffwithstuff.com/category/js">js</a> <a href="http://journal.stuffwithstuff.com/category/language">language</a> <a href="http://journal.stuffwithstuff.com/category/magpie">magpie</a> <a href="http://journal.stuffwithstuff.com/category/parsing">parsing</a></span>
+</h4>
+
+<p>Every now and then, I stumble onto some algorithm or idea that’s so clever and
+such a perfect solution to a problem that I feel like I got smarter or gained
+<a href="http://xkcd.com/208/">a new superpower</a> just by learning it. <a href="http://en.wikipedia.org/wiki/Heap_%28data_structure%29">Heaps</a> (just about the only
+thing I got out of my truncated CS education) were one thing like this. I
+recently stumbled onto another: <a href="http://en.wikipedia.org/wiki/Vaughan_Pratt">Pratt</a> parsers.</p>
+
+<p>When you’re writing a parser, <a href="http://en.wikipedia.org/wiki/Recursive_descent">recursive descent</a> is as easy as spreading
+peanut butter. It excels when you can figure out what to do next based on the
+next chunk of code you’re parsing. That’s usually true at the top level of a
+language where things like classes are and also for statements since most
+start with something that uniquely identifies them (<code>if</code>, <code>for</code>, <code>while</code>,
+etc.).</p>
+
+<p>But it gets tricky when you get to expressions. When it comes to infix
+operators like <code>+</code>, postfix ones like <code>++</code>, and even mixfix expressions like
+<code>?:</code>, it can be hard to tell what kind of expression you’re parsing until
+you’re halfway through it. You <em>can</em> do this with recursive descent, but it’s
+a chore. You have to write separate functions for each level of precedence
+(JavaScript has 17 of them, for example), manually handle associativity, and
+smear your grammar across a bunch of parsing code until it’s hard to see.</p>
+
+<h2>PB &amp; J, The Secret Weapon</h2>
+
+<p>Pratt parsing fixes just that. If recursive descent is peanut butter, Pratt
+parsing is jelly. When you mix the two together, you get a simple, terse,
+readable parser that can handle any grammar you throw at it.</p>
+
+<p>Pratt’s technique for handling operator precedence and infix expressions is so
+simple and effective it’s a mystery why almost no one knows about it. After
+the seventies, top down operator precedence parsers seem to have fallen off
+the Earth. Douglas Crockford’s <a href="http://www.jslint.com/">JSLint</a> uses one to <a href="http://javascript.crockford.com/tdop/tdop.html">parse
+JavaScript</a>, but his treatment is one of the <a href="http://effbot.org/zone/simple-top-down-parsing.htm">very few</a> remotely
+modern articles about it.</p>
+
+<p>Part of the problem, I think, is that Pratt’s terminology is opaque, and
+Crockford’s article is itself rather murky. Pratt uses terms like “null
+denominator” and Crockford mixes in extra stuff like tracking lexical scope
+that obscures the core idea.</p>
+
+<p>This is where I come in. I won’t do anything revolutionary. I’ll just try to
+get the core concepts behind top down operator precedence parsers and present
+them as clearly as I can. I’ll switch out some terms to (I hope) clarify
+things. Hopefully I won’t offend anyone’s purist sensibilities. I’ll be coding
+in Java, the vulgar Latin of programming languages. I figure if you can write
+it in Java, you can write it in anything.</p>
+
+<h2>What We’ll Be Making</h2>
+
+<p>I’m a learn-by-doing person, which means I’m also a teach-by-doing one. So to
+show how Pratt parsers work, we’ll build a parser for a <a href="https://github.com/munificent/bantam">tiny little toy
+language called <em>Bantam</em></a>. It just has expressions since that’s where
+Pratt parsing is really helpful, but that should be enough to convince of its
+usefulness.</p>
+
+<p>Even though it’s simple, it has a full gamut of operators: prefix (<code>+</code>, <code>-</code>,
+<code>~</code>, <code>!</code>), postfix (<code>!</code>), infix (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>), and even a mixfix
+conditional operator (<code>?:</code>). It has multiple precedence levels and both right
+and left associative operators. It also has assignment, function calls and
+parentheses for grouping. If we can parse this, we can parse anything.</p>
+
+<h2>What We’ll Start With</h2>
+
+<p>All we care about is parsing, so we’ll ignore the tokenizing phase. I slapped
+together <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/Lexer.java">a crude lexer</a> that works and we’ll just pretend that tokens are
+raining down from heaven or something.</p>
+
+<p>A token is just a chunk of meaningful code with a type and a string associated
+with it. Given <code>a + b(c)</code>, the tokens would be:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>NAME "a"
+PLUS "+"
+NAME "b"
+LEFT_PAREN "("
+NAME "c"
+RIGHT_PAREN ")"
+</code></pre></div>
+<p>Likewise, we won’t be <em>interpreting</em> or <em>compiling</em> this code. We just want to
+parse it to a nice data structure. For our purposes, that means our parser
+should chew up a bunch of <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/Token.java"><code>Token</code></a> objects and spit out an instance of
+some class that implements <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/expressions/Expression.java"><code>Expression</code></a>. To give you an idea, here’s a
+simplified version of the class for a <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/expressions/ConditionalExpression.java">conditional expression</a>:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">ConditionalExpression</span> <span class="kd">implements</span> <span class="n">Expression</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="nf">ConditionalExpression</span><span class="o">(</span>
+      <span class="n">Expression</span> <span class="n">condition</span><span class="o">,</span>
+      <span class="n">Expression</span> <span class="n">thenArm</span><span class="o">,</span>
+      <span class="n">Expression</span> <span class="n">elseArm</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">condition</span> <span class="o">=</span> <span class="n">condition</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">thenArm</span>   <span class="o">=</span> <span class="n">thenArm</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">elseArm</span>   <span class="o">=</span> <span class="n">elseArm</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">final</span> <span class="n">Expression</span> <span class="n">condition</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">final</span> <span class="n">Expression</span> <span class="n">thenArm</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">final</span> <span class="n">Expression</span> <span class="n">elseArm</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>(You gotta love Java’s “please sign it in quadruplicate” level of bureaucracy
+here. Like I said, if you can do this in Java, you can do it in <em>any</em>
+language.)</p>
+
+<p>We’ll be building this starting from a simple <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/Parser.java"><code>Parser</code></a> class. This owns
+the token stream, handles lookahead and provides the basic methods you’ll need
+to write a top-down recursive descent parser with a single token of lookahead
+(i.e. it’s LL(1)). This is enough to get us going. If we need more later, it’s
+easy to extend it.</p>
+
+<p>OK, let’s build ourselves a parser!</p>
+
+<h2>First Things First</h2>
+
+<p>Even though a “full” Pratt parser is pretty tiny, I found it to be a bit hard
+to decipher. Sort of like <a href="http://en.wikipedia.org/wiki/Quicksort">quicksort</a>,
+the implementation is a deceptively-simple handful of deeply intertwined code.
+To untangle it, we’ll build it up one tiny step at a time.</p>
+
+<p>The simplest expressions to parse are prefix operators and single-token ones.
+For those, the current token tells us all that we need to do. Bantam has one
+single-token expression, named variables, and four prefix operators: <code>+</code>, <code>-</code>,
+<code>~</code>, and <code>!</code>. The simplest possible code to parse that would be:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">Expression</span> <span class="nf">parseExpression</span><span class="o">()</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">match</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">NAME</span><span class="o">))</span>       <span class="c1">// return NameExpression...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">match</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">PLUS</span><span class="o">))</span>  <span class="c1">// return prefix + operator...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">match</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">MINUS</span><span class="o">))</span> <span class="c1">// return prefix - operator...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">match</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">TILDE</span><span class="o">))</span> <span class="c1">// return prefix ~ operator...</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">match</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">BANG</span><span class="o">))</span>  <span class="c1">// return prefix ! operator...</span>
+  <span class="k">else</span> <span class="k">throw</span> <span class="k">new</span> <span class="n">ParseException</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>But that’s a bit monolithic. As you can see, we’re switching off of a
+<code>TokenType</code> to branch to different parsing behavior. Let’s encode that
+directly by making a <code>Map</code> from <code>TokenTypes</code> to chunks of parsing code. We’ll
+call these chunks “parselets”, and they will implement this:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">interface</span> <span class="nc">PrefixParselet</span> <span class="o">{</span>
+  <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>An implementation of this to parse variable names is just:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">NameParselet</span> <span class="kd">implements</span> <span class="n">PrefixParselet</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">NameExpression</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getText</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>We can use a single class for all of the prefix operators since they only
+differ in the actual operator token itself:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">PrefixOperatorParselet</span> <span class="kd">implements</span> <span class="n">PrefixParselet</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Expression</span> <span class="n">operand</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="na">parseExpression</span><span class="o">();</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">PrefixExpression</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">(),</span> <span class="n">operand</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>You’ll note that it calls back into <code>parseExpression()</code> to parse the operand
+that appears after the operator (i.e. to parse the <code>a</code> in <code>-a</code>). This
+recursion takes care of nested operators like <code>-+~!a</code>.</p>
+
+<p>Back in <code>Parser</code>, the chained <code>if</code> statements are replaced with a cleaner map:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">Parser</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="o">(</span><span class="n">TokenType</span> <span class="n">token</span><span class="o">,</span> <span class="n">PrefixParselet</span> <span class="n">parselet</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">mPrefixParselets</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">token</span><span class="o">,</span> <span class="n">parselet</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parseExpression</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">Token</span> <span class="n">token</span> <span class="o">=</span> <span class="n">consume</span><span class="o">();</span>
+    <span class="n">PrefixParselet</span> <span class="n">prefix</span> <span class="o">=</span> <span class="n">mPrefixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">prefix</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="n">ParseException</span><span class="o">(</span>
+        <span class="s">"Could not parse \""</span> <span class="o">+</span> <span class="n">token</span><span class="o">.</span><span class="na">getText</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\"."</span><span class="o">);</span>
+
+    <span class="k">return</span> <span class="n">prefix</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="c1">// Other stuff...</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">TokenType</span><span class="o">,</span> <span class="n">PrefixParselet</span><span class="o">&gt;</span> <span class="n">mPrefixParselets</span> <span class="o">=</span>
+      <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">TokenType</span><span class="o">,</span> <span class="n">PrefixParselet</span><span class="o">&gt;();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>To define the grammar we have so far (variables and the four prefix
+operators), we’ll make this helper method:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kt">void</span> <span class="nf">prefix</span><span class="o">(</span><span class="n">TokenType</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+  <span class="n">register</span><span class="o">(</span><span class="n">token</span><span class="o">,</span> <span class="k">new</span> <span class="n">PrefixOperatorParselet</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>And now we can define the grammar like:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">register</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">NAME</span><span class="o">,</span> <span class="k">new</span> <span class="n">NameParselet</span><span class="o">());</span>
+<span class="n">prefix</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">PLUS</span><span class="o">);</span>
+<span class="n">prefix</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">MINUS</span><span class="o">);</span>
+<span class="n">prefix</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">TILDE</span><span class="o">);</span>
+<span class="n">prefix</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">BANG</span><span class="o">);</span>
+</code></pre></div>
+<p>This is already an improvement over a recursive descent parser because our
+grammar is now more declarative instead of being spread out over a few
+imperative functions, and we can see the actual grammar all in one place. Even
+better, we can extend the grammar just by registering new parselets. We don’t
+have to change the <code>Parser</code> class itself.</p>
+
+<p>If we <em>only</em> had prefix expressions, we’d be done now. Alas, we don’t.</p>
+
+<h2>Stuck In the Middle</h2>
+
+<p>What we have so far only works if the <em>first</em> token tells us what kind of
+expression we’re parsing, but that isn’t always the case. With an expression
+like <code>a + b</code>, we don’t know we have an add expression until after we parse the
+<code>a</code> and get to <code>+</code>. We’ll have to extend the parser to support that.</p>
+
+<p>Fortunately, we’re in a good place to do so. Our current <code>parseExpression()</code>
+method will parse a complete prefix expression including any nested prefix
+expressions and then stop. So, if we throw this at it:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="o">-</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</code></pre></div>
+<p>It will parse <code>-a</code> and leave us sitting on <code>+</code>. That’s exactly the token we
+need to tell what infix expression we’re parsing. The only difference between
+an infix expression and a prefix one here is that there’s another expression
+<em>before</em> the infix operator that it needs to have as an argument. Let’s define
+a parselet that supports that:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">interface</span> <span class="nc">InfixParselet</span> <span class="o">{</span>
+  <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Expression</span> <span class="n">left</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The only difference is that <code>left</code> argument, which is just the expression we
+parsed before we got to the infix token. We’ll wire this up to our parser by
+having another table of infix parselets.</p>
+
+<p>Having separate tables for prefix and infix expressions is important because
+we’ll often have both a prefix and infix parselet for a single <code>TokenType</code>. For
+example, the prefix parselet for <code>(</code> handles grouping in an expression like <code>a
+* (b + c)</code>. Meanwhile, the <em>infix</em> parselet handles function calls like
+<code>a(b)</code>.</p>
+
+<p>Now, after we parse the prefix expression, we hand it off to any infix one
+that subsumes it:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">Parser</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="o">(</span><span class="n">TokenType</span> <span class="n">token</span><span class="o">,</span> <span class="n">InfixParselet</span> <span class="n">parselet</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">mInfixParselets</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">token</span><span class="o">,</span> <span class="n">parselet</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parseExpression</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">Token</span> <span class="n">token</span> <span class="o">=</span> <span class="n">consume</span><span class="o">();</span>
+    <span class="n">PrefixParselet</span> <span class="n">prefix</span> <span class="o">=</span> <span class="n">mPrefixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">prefix</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="n">ParseException</span><span class="o">(</span>
+        <span class="s">"Could not parse \""</span> <span class="o">+</span> <span class="n">token</span><span class="o">.</span><span class="na">getText</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\"."</span><span class="o">);</span>
+
+    <span class="n">Expression</span> <span class="n">left</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">lookAhead</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+    <span class="n">InfixParselet</span> <span class="n">infix</span> <span class="o">=</span> <span class="n">mInfixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+
+    <span class="c1">// No infix expression at this point, so we're done.</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">infix</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">return</span> <span class="n">left</span><span class="o">;</span>
+
+    <span class="n">consume</span><span class="o">();</span>
+    <span class="k">return</span> <span class="n">infix</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="c1">// Other stuff...</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">TokenType</span><span class="o">,</span> <span class="n">InfixParselet</span><span class="o">&gt;</span> <span class="n">mInfixParselets</span> <span class="o">=</span>
+      <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">TokenType</span><span class="o">,</span> <span class="n">InfixParselet</span><span class="o">&gt;();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Pretty straightforward. We can implement an infix parselet for binary
+arithmetic operators like <code>+</code> using something like:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">BinaryOperatorParselet</span> <span class="kd">implements</span> <span class="n">InfixParselet</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span>
+      <span class="n">Expression</span> <span class="n">left</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Expression</span> <span class="n">right</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="na">parseExpression</span><span class="o">();</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">OperatorExpression</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">(),</span> <span class="n">right</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This also works for postfix operators. I’m calling them “infix” parselets, but
+they’re really “anything but prefix”. If there’s some expression that comes
+before the token, it will be handled by an infix parselet, and that includes
+postfix expressions and mixfix ones like <code>?:</code>.</p>
+
+<p>Postfix is as easy as a single-token prefix parselet: it just takes the <code>left</code>
+expression and wraps it in another expression:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">PostfixOperatorParselet</span> <span class="kd">implements</span> <span class="n">InfixParselet</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Expression</span> <span class="n">left</span><span class="o">,</span>
+      <span class="n">Token</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">PostfixExpression</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Mixfix is easy too. It’s pretty much a familiar recursive descent parser:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">class</span> <span class="nc">ConditionalParselet</span> <span class="kd">implements</span> <span class="n">InfixParselet</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Expression</span> <span class="n">left</span><span class="o">,</span>
+      <span class="n">Token</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Expression</span> <span class="n">thenArm</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="na">parseExpression</span><span class="o">();</span>
+    <span class="n">parser</span><span class="o">.</span><span class="na">consume</span><span class="o">(</span><span class="n">TokenType</span><span class="o">.</span><span class="na">COLON</span><span class="o">);</span>
+    <span class="n">Expression</span> <span class="n">elseArm</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="na">parseExpression</span><span class="o">();</span>
+
+    <span class="k">return</span> <span class="k">new</span> <span class="n">ConditionalExpression</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">thenArm</span><span class="o">,</span> <span class="n">elseArm</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Now we can parse prefix expressions, postfix, infix, and even mixfix. With a
+pretty small amount of code, we can parse expressions like <code>a + (b ? c! :
+-d)</code>. We’re done, right? Well… almost.</p>
+
+<h2>Excuse You, Aunt Sally</h2>
+
+<p>Our parser <em>can</em> parse all of this stuff, but it doesn’t parse it with the
+right precedence or associativity. If you throw <code>a - b - c</code> at it, it will
+parse it like <code>a - (b - c)</code>, which isn’t right. (Well, actually it is
+<em>right</em>—associative that is. We need it to be <em>left</em>.)</p>
+
+<p>And this <em>last</em> step is where Pratt parsers go from pretty nice to totally
+radical. We’ll make two simple changes. We’ll extend <code>parseExpression()</code> to
+take a <em>precedence</em>—a number that tells which expressions can be parsed by
+that call. If it encounters an expression whose precedence is lower than we
+allow, it just stops parsing and returns what it has so far.</p>
+
+<p>To make that check we need to know the precedence of any given infix
+expression. We’ll do that by letting the parselet specify it:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">InfixParselet</span> <span class="o">{</span>
+  <span class="n">Expression</span> <span class="nf">parse</span><span class="o">(</span><span class="n">Parser</span> <span class="n">parser</span><span class="o">,</span> <span class="n">Expression</span> <span class="n">left</span><span class="o">,</span> <span class="n">Token</span> <span class="n">token</span><span class="o">);</span>
+  <span class="kt">int</span> <span class="nf">getPrecedence</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Using that, our core expression parser becomes:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">public</span> <span class="n">Expression</span> <span class="nf">parseExpression</span><span class="o">(</span><span class="kt">int</span> <span class="n">precedence</span><span class="o">)</span> <span class="o">{</span>
+  <span class="n">Token</span> <span class="n">token</span> <span class="o">=</span> <span class="n">consume</span><span class="o">();</span>
+  <span class="n">PrefixParselet</span> <span class="n">prefix</span> <span class="o">=</span> <span class="n">mPrefixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+
+  <span class="k">if</span> <span class="o">(</span><span class="n">prefix</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="n">ParseException</span><span class="o">(</span>
+      <span class="s">"Could not parse \""</span> <span class="o">+</span> <span class="n">token</span><span class="o">.</span><span class="na">getText</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\"."</span><span class="o">);</span>
+
+  <span class="n">Expression</span> <span class="n">left</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+
+  <span class="k">while</span> <span class="o">(</span><span class="n">precedence</span> <span class="o">&lt;</span> <span class="n">getPrecedence</span><span class="o">())</span> <span class="o">{</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">consume</span><span class="o">();</span>
+
+    <span class="n">InfixParselet</span> <span class="n">infix</span> <span class="o">=</span> <span class="n">mInfixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getType</span><span class="o">());</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">infix</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="k">return</span> <span class="n">left</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>That relies on a tiny helper function to get the precedence of the current
+token or default if there’s no infix parselet for it:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">private</span> <span class="kt">int</span> <span class="nf">getPrecedence</span><span class="o">()</span> <span class="o">{</span>
+  <span class="n">InfixParselet</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">mInfixParselets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span>
+      <span class="n">lookAhead</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">getType</span><span class="o">());</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">parser</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="na">getPrecedence</span><span class="o">();</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>And that’s it. To use this, we’ll set up a little precedence table:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Precedence</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">ASSIGNMENT</span>  <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CONDITIONAL</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">SUM</span>         <span class="o">=</span> <span class="mi">3</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">PRODUCT</span>     <span class="o">=</span> <span class="mi">4</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">EXPONENT</span>    <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">PREFIX</span>      <span class="o">=</span> <span class="mi">6</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">POSTFIX</span>     <span class="o">=</span> <span class="mi">7</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CALL</span>        <span class="o">=</span> <span class="mi">8</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>To make our operators correctly handle precedence, they’ll pass an appropriate
+value back into <code>parseExpression()</code> when they call it recursively. For
+example, the <a href="https://github.com/munificent/bantam/blob/master/src/com/stuffwithstuff/bantam/parselets/BinaryOperatorParselet.java"><code>BinaryOperatorParselet</code></a> instance that handles the <code>+</code>
+operator will pass in <code>Precedence.SUM</code> when it parses its right-hand operand.</p>
+
+<p>Associativity is easy too. If an infix parselet calls <code>parseExpression()</code> with
+the <em>same</em> precedence that it returns for its own <code>getPrecedence()</code> call,
+you’ll get left associativity. To be right-associative, it just needs to pass
+in <em>one less</em> than that instead.</p>
+
+<h2>Go Forth and Multiply</h2>
+
+<p>I’ve rewritten the <a href="https://github.com/munificent/magpie/blob/master/src/com/stuffwithstuff/magpie/parser/MagpieParser.java">parser for Magpie</a> using this and it worked like a
+charm. I’m also working on a JavaScript parser based on this and again it’s
+been a great fit.</p>
+
+<p>I find parsing like this to be simple, terse, extensible (Magpie, for example,
+uses this to <a href="http://journal.stuffwithstuff.com/2011/02/13/extending-syntax-from-within-a-language/">let you extend its own syntax</a> at runtime), and easy to
+read. I’m at the point where I can’t imagine writing a parser any other way. I
+never thought I’d say this, but parsers are easy now.</p>
+
+<p>To see for yourself, just take a look at <a href="http://github.com/munificent/bantam">the complete program</a>.</p>
+
+  <div class="social">
+    <a href="http://www.reddit.com/submit?url=http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy//" target="_blank">
+      <i class="fa fa-lg fa-reddit-square"></i>
+    </a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy//&amp;t=Pratt%20Parsers:%20Expression%20Parsing%20Made%20Easy" target="_blank">
+      <i class="fa fa-lg fa-hacker-news"></i>
+    </a>
+
+    <a href="http://twitter.com/share?url=http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/&amp;text=%22Pratt%20Parsers:%20Expression%20Parsing%20Made%20Easy%22%20%40munificentbob" target="_blank">
+      <i class="fa fa-lg fa-twitter-square"></i>
+    </a>
+
+    <a href="http://www.facebook.com/share.php?u=http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/" target="_blank">
+      <i class="fa fa-lg fa-facebook-square"></i>
+    </a>
+
+    <a href="https://plus.google.com/share?url=http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/" target="_blank">
+      <i class="fa fa-lg fa-google-plus-square"></i>
+    </a>
+
+    <a href="http://journal.stuffwithstuff.com/rss.xml">
+      <i class="fa fa-lg fa-rss-square"></i>
+    </a>
+  </div>
+
+  
+  <div class="comments">
+    <div id="disqus_thread"><iframe id="dsq-app9837" name="dsq-app9837" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 1px !important; min-width: 100% !important; border: medium none !important; overflow: hidden !important; height: 5885px !important;" src="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a.html" horizontalscrolling="no" verticalscrolling="no" width="100%" frameborder="0"></iframe><iframe id="indicator-north" name="indicator-north" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 576px !important; border: medium none !important; overflow: hidden !important; top: 0px !important; min-width: 576px !important; max-width: 576px !important; position: fixed !important; z-index: 2147483646 !important; height: 19px !important; min-height: 19px !important; max-height: 19px !important; display: none !important;" frameborder="0"></iframe><iframe id="indicator-south" name="indicator-south" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 576px !important; border: medium none !important; overflow: hidden !important; bottom: 0px !important; min-width: 576px !important; max-width: 576px !important; position: fixed !important; z-index: 2147483646 !important; height: 19px !important; min-height: 19px !important; max-height: 19px !important; display: none !important;" frameborder="0"></iframe></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'journal-stuffwithstuff';
+        var disqus_url = "http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/";
+
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</article>
+
+
+      <nav>
+  <div class="nav-first">
+    <a href="http://journal.stuffwithstuff.com/"><img src="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/dogshot_square.jpg" class="bob"></a>
+
+    <p>Hi! I'm <strong>Bob Nystrom</strong>, the one on the left.</p>
+    <p>I wrote a book called <a href="http://gameprogrammingpatterns.com/"><strong>Game Programming Patterns</strong></a>. I'm working on another book called
+    <a href="http://craftinginterpreters.com/">Crafting Interpreters</a></p>
+    <p>You can email me at <code>robert</code> at this site or follow me on twitter at <a href="https://twitter.com/intent/user?screen_name=munificentbob"><code>@munificentbob</code></a>.</p>
+
+    <h2>Elsewhere</h2>
+    <ul>
+      <li>Code at <a href="http://github.com/munificent">github</a></li>
+      <li>Tweets at <a href="http://twitter.com/munificentbob">twitter</a></li>
+      <li>Photos at <a href="https://500px.com/munificent">500px</a></li>
+      <li>Photos at <a href="http://www.flickr.com/photos/bobisbob/">flickr</a></li>
+    </ul>
+  </div>
+  <div class="nav-second">
+    <h2>Categories</h2>
+    <ul><li><a href="http://journal.stuffwithstuff.com/category/code">code</a> <small class="post-count">67</small></li><li><a href="http://journal.stuffwithstuff.com/category/language">language</a> <small class="post-count">41</small></li><li><a href="http://journal.stuffwithstuff.com/category/magpie">magpie</a> <small class="post-count">24</small></li><li><a href="http://journal.stuffwithstuff.com/category/c-sharp">c-sharp</a> <small class="post-count">13</small></li><li><a href="http://journal.stuffwithstuff.com/category/dart">dart</a> <small class="post-count">13</small></li><li><a href="http://journal.stuffwithstuff.com/category/game-dev">game-dev</a> <small class="post-count">12</small></li><li><a href="http://journal.stuffwithstuff.com/category/java">java</a> <small class="post-count">10</small></li><li><a href="http://journal.stuffwithstuff.com/category/cpp">cpp</a> <small class="post-count">8</small></li><li><a href="http://journal.stuffwithstuff.com/category/game-patterns">game-patterns</a> <small class="post-count">6</small></li><li><a href="http://journal.stuffwithstuff.com/category/parsing">parsing</a> <small class="post-count">6</small></li><li><a href="http://journal.stuffwithstuff.com/category/roguelike">roguelike</a> <small class="post-count">6</small></li><li><a href="http://journal.stuffwithstuff.com/category/design">design</a> <small class="post-count">5</small></li><li><a href="http://journal.stuffwithstuff.com/category/go">go</a> <small class="post-count">5</small></li><li><a href="http://journal.stuffwithstuff.com/category/js">js</a> <small class="post-count">4</small></li><li><a href="http://journal.stuffwithstuff.com/category/book">book</a> <small class="post-count">3</small></li><li><a href="http://journal.stuffwithstuff.com/category/c">c</a> <small class="post-count">3</small></li><li><a href="http://journal.stuffwithstuff.com/category/finch">finch</a> <small class="post-count">3</small></li><li><a href="http://journal.stuffwithstuff.com/category/python">python</a> <small class="post-count">3</small></li><li><a href="http://journal.stuffwithstuff.com/category/ruby">ruby</a> <small class="post-count">3</small></li><li><a href="http://journal.stuffwithstuff.com/category/blog">blog</a> <small class="post-count">2</small></li><li><a href="http://journal.stuffwithstuff.com/category/f-sharp">f-sharp</a> <small class="post-count">2</small></li><li><a href="http://journal.stuffwithstuff.com/category/lua">lua</a> <small class="post-count">2</small></li><li><a href="http://journal.stuffwithstuff.com/category/music">music</a> <small class="post-count">2</small></li><li><a href="http://journal.stuffwithstuff.com/category/ai">ai</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/beta">beta</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/blogofile">blogofile</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/game">game</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/jasic">jasic</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/javascript">javascript</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/oop">oop</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/optimization">optimization</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/oscon">oscon</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/politics">politics</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/scheme">scheme</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/typescript">typescript</a> <small class="post-count">1</small></li><li><a href="http://journal.stuffwithstuff.com/category/visualization">visualization</a> <small class="post-count">1</small></li></ul>
+
+    <p class="archive">All <a href="http://journal.stuffwithstuff.com/archive">74 articles</a>…</p>
+
+    <p>This blog is built using <a href="http://jekyllrb.com/">jekyll</a>. The source repo for it is <a href="https://github.com/munificent/journal">here</a>.</p>
+    <p class="copyright">© 2008-2014 Robert Nystrom</p>
+  </div>
+</nav>
+    </div>
+  
+
+<iframe style="display: none;"></iframe><iframe id="dsq-app9840" name="dsq-app9840" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 1px !important; min-width: 100% !important; border: medium none !important; overflow: hidden !important; height: 100% !important; position: fixed !important; inset: 0px 0px auto auto !important; z-index: 2147483647 !important; display: none !important;" src="Pratt%20Parsers%20%20Expression%20Parsing%20Made%20Easy%20%E2%80%93%20journal.stuffwithstuff.com_files/a_005.html" width="100%" frameborder="0"></iframe></body></html>
