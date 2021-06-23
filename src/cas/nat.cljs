@@ -15,9 +15,6 @@
 (def var-letters
   (set (map (partial str \v) letters)))
 
-(defn unmark-var [v]
-  (second v))
-
 (def test-str "ypreqxsqovysq") ;y pr eq x sq ov y sq ;y'=(x^2)/(y^2)
 (def cmds  (set (concat
                  num-codes
@@ -187,8 +184,6 @@
 (declare precedence)
 (declare get-parser)
 
-(defn parse-term [term])
-
 
 (defn signifies-multiplication? [ppe nt]  ;parsed-previous-exp next-token
   (case ppe
@@ -213,8 +208,6 @@
   (= t (get-type item)))
 
 (def types-data
-  ;TODO so making :sum and :product return vectors of pairs was good, but something is glitching because of that, likely because other things aren't ready to get them
-  
   {:close-paren {:precedence -1
                  :parselet (fn [& args] #_[left more #_[op & remainder]]
                              (println "close-paren parselet args: " args)
@@ -225,13 +218,10 @@
                              {:parsed left
                               :remaining remainder})}
 
-  ; the trick is to rely on the parser getting bored and putting everything in open-paren
-
    :open-paren {:precedence 15
                 :parselet (fn [[op & remainder]]
 #_#_                            (sh/debug op)
                             (sh/debug remainder)
-
 
                             (let [{:keys [parsed remaining]} (mparse remainder 0)
                                   [close-paren & remaining] remaining]
