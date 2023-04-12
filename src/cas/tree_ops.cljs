@@ -66,7 +66,7 @@ The last item is special."
 
 (defn update-node [node f & args]
   (if (vector? node)
-    (apply vector (apply f node args) (rest node) )
+    (apply vector (apply f (first node) args) (rest node) )
    (apply f node args)))
 
 (defn reset-at-path! [p v]
