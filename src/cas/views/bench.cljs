@@ -40,12 +40,9 @@
 (def rendered-manipulang  (basics/full-tex-display manipulang-tex-atm))
 
 
-
 (rum/defc editable-textarea < rum/reactive [atm]
   [:textarea {:on-change #(reset! atm (.. % -target -value))
-              :value   (rum/react atm)
-              }
-])
+              :value   (rum/react atm)}])
 
 
 (def hw-disp (editable-textarea hw-atom))
@@ -60,7 +57,6 @@
 
 (rum/defc eq-watch < rum/reactive []
   [:div "generated latex:" (rum/react eq-atom)])
-
 
 
 (defn add-to-hw [new-stuff]
@@ -87,7 +83,7 @@
 
 (doseq [[nom ke] [[left-side :left]
                   [right-side :right]]]
- (add-watch nom :texify-and-update (fn [k r o n]
+(add-watch nom :texify-and-update (fn [k r o n]
                                      (let [tex (-> n utils/parse (.toTex))]
                                        (swap! eq-parts-atm assoc-in [ke] tex)))))
 (add-watch eq-parts-atm :fix (fn [k r o n] (reset! eq-atom (mk-latex-equation n))))
@@ -103,11 +99,14 @@
    "="
    (loader right-side)])
 
-
 (rum/defc bench-comp < rum/reactive []
   [:div#first
    [:div [:div "uses three atoms: inp, parsed, texified"]
-    (loader inp)
+
+    [:div "inp:" ]
+     (loader inp)
+    [:div "parsed:" (rum/react parsed)]
+    [:div "by \"parsed\" we are using " [:a {:href "https://github.com/josdejong/mathjs"} "MathJS"] "'s 'parse' method"]
     [:div "tex:" (rum/react texified)]
     (basics/full-tex-display texified)
     [:hr]]

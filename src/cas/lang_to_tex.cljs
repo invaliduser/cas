@@ -55,10 +55,10 @@
 (def operator?
   (set (keys fns)))
 
-(defn compile-to-tex [form]
+(defn- compile-to-tex* [form]
   (cond (vector? form)
         (let [results (for [item form]
-                        (compile-to-tex item))]
+                        (compile-to-tex* item))]
           (apply (first results) (rest results)))
 
         (number? form)
@@ -70,9 +70,11 @@
         (string? form)
         (cond #_(= form "cursor")
               
-              
               :else (let [inted (js/parseInt form)]
                       (if (js/isNaN inted)
                         form
                         inted)))))
+
+(defn compile-to-tex [form]
+  (str (compile-to-tex* form)))
 

@@ -8,9 +8,7 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
-                 [org.clojure/core.async  "0.4.500"]
                  [devcards "0.2.7"]
-                 
                  [rum "0.11.4"]
                  [org.clojure/core.async "0.7.559"]
                  [automat "0.2.4"]

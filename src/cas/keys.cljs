@@ -18,6 +18,7 @@
    ;"e" :start-edit-mode
    "o" :open
    "c" :close
+   "h" :children
    "s" :snapshot
    ;"m" :minimize
 
@@ -42,7 +43,9 @@
 
 
 (rum/defc key-stream-display < rum/reactive []
-  [:div {:style {:text-align "center" :font-size 24} :on-click #(reset! keystream '())}
+  [:div {:style {:text-align "center" :font-size 24} :on-click #(do
+                                                                  (println "reset keystream")
+                                                                  (reset! keystream '()))}
    [:span "resolved here"]
    [:br]
    [:span {:style { }} (apply str (interpose " " (rum/react keystream)))]
@@ -66,16 +69,67 @@
         (handler ev)))))
 
 
+;key handlers are like middleware, taking another handler
 (def key-handlers [#(tokenizeable-key-handler % (cas.state/atom-map "tokenize-material"))
-                   identity ; bench
+                   identity               ; bench
                    tree-manip-key-handler ;tree-manip
 
                    ])
 
+(defn debug-key-listener [handler]
+  (fn [ev]
+    (println "pressed " (.-key ev) " in " @mode " mode")
+    (handler ev)))
+
+(defn mode-switch-listener [handler]
+  (fn [ev]
+    (if (= (.-key ev) \\)
+      (let [new-mode (case @mode :write :edit :edit :write)]
+        (if (= new-mode :write)
+          (reset! was-write-mode-before? false))
+        (reset! mode new-mode)
+        (println "setting to " new-mode " mode")))
+    (handler ev)))
+
+(defn keystream-watch-listener [handler]
+  (fn [ev]
+    (let [k (.-key ev)]
+      (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
+        (swap! keystream conj k))
+      (handler ev))))
+
+(defn send-to-key-chan-listener [handler]
+  (fn [ev]
+    (if-let [v (hotkeys-map k)]
+      (do (js/console.log (name v))
+          (go (>! key-chan v))
+          (handler ev))
+      (js/console.log (str k " pressed, no action associated...")))))
+
+(defn write-mode-listener [handler] ;we're not sure what this does...
+  (fn [ev]
+    (cond (not (.-ctrlKey ev))
+          (if @was-write-mode-before?
+            (do (swap! keylang-input str k)
+                (full-reset-at-path! @highlight-atom (full @keylang-input)))
+            (reset! was-write-mode-before? true))
+
+          #_(if @was-write-mode-before?
+              (append-at-path! @highlight-atom k)
+              (do (reset-at-path! @highlight-atom k)
+                  (reset! was-write-mode-before? true))))))
+
+
 (defn great-white-key-listener [ev]
-  (let [pipeline (cond-> identity ;?
+  (let [pipeline (cond-> identity       ;?
                    true ((key-handlers (:idx @cas.state/toogleoo)))
+;                   (= @mode :edit) (send-to-key-chan-listener)
+;                   (= @mode :write) (write-mode-listener)
+                   true (mode-switch-listener)
+                   true (keystream-watch-listener)
+                   true (debug-key-listener)
                                         ;keypresses move bottom-up
+                   
                    )]
     (pipeline ev)))
 
@@ -86,7 +140,7 @@
 
     ((tokenizeable-key-handler identity (cas.state/atom-map "tokenize-material"))
      ev)
-#_#_    
+    
     (println "pressed " k " in " @mode " mode")
     
     (if (= k \\)
@@ -105,26 +159,16 @@
               (js/console.log (str k " pressed, no action associated...")))
 
             :write              ;getting into write mode is a one-time thing,
-            (cond (not (.-ctrlKey ev))
-                  (if @was-write-mode-before?
-                    (do (swap! keylang-input str k)
-                        (full-reset-at-path! @highlight-atom (full @keylang-input)))
-                    (reset! was-write-mode-before? true))
 
-                  #_(if @was-write-mode-before?
-                      (append-at-path! @highlight-atom k)
-                      (do (reset-at-path! @highlight-atom k)
-                          (reset! was-write-mode-before? true))))
             :default nil)
 
           
-          (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
-            (swap! keystream conj k))))))
+))))
 
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)
                    (.-KEYDOWN events/EventType)
-                   #_great-white-key-listener
+                   great-white-key-listener
                    #_key-down-listener)
 
   (events/listen (.-body js/document)

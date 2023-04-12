@@ -9,7 +9,7 @@
   (println (str "starting " nom " listener..."))
   (go-loop []
     (let [e (<! c)]
-      (if before  (before e)) 
+      (if before (before e)) 
       (if-let [action (m e)]
         (do (action)
             (after e))

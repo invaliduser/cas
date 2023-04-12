@@ -1,0 +1,25 @@
+
+* concepts
+** manipulang is the intermediate representation---basically a lisp, with vectors.  terms in operations often represented as binary might need wrapper terms [:sum [:plus "x"]]
+** fake/real-paths
+***  see L96 in cas.tree_ops
+*** from the mismatch of how [+ 1 2] is both single-level (it's one vector) and multi-level ( 1 and 2 are children of +)
+*** possibly change operations so up/down etc, make sense with real path?
+up: if (last current) !=0, make 0, else subtract last   ---wrong! see from "+" to 999 in cas.tree_ops, l96
+down: add a 0
+right: inc last
+left: dec last
+
+
+*** a "real" path is one you can use with what's in @tree-atom
+*** a "fake" path
+* structure
+** hotkeys
+*** listeners are like middleware
+*** for tree manipulation, they're mapped to an "action" (keyword), which dispatches in microsoft_directory_tree
+** chans
+ key-chan
+
+* comps (board, bench, tree-manipulation)
+** bench is for one-off components a la devcards
+** 

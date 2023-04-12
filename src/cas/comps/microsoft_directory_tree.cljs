@@ -19,7 +19,7 @@
                     ;is highlighted directly and specifically
      (= np hp)
 
-                    ;ancestor is higlighted
+                    ;ancestor is highlighted
      (= hp (subvec np 0 chp))
 
      ))
@@ -68,11 +68,11 @@
 (rum/defc node-disp [node path]
   (if-not (children? node)
     [:div (node-comp node path)]
-    [:div (concat [(node-comp node path)]
-                  (map-indexed (fn [idx node]
-                                 (let [p (conj path idx)]
-                                   (node-disp node p)))
-                               (children node)))]))
+    (into [:div] (concat [(node-comp node path)]
+                         (map-indexed (fn [idx node]
+                                        (let [p (conj path idx)]
+                                          (node-disp node p)))
+                                      (children node))))))
 
 
 (rum/defc real-path-node-disp [node path]
@@ -115,11 +115,17 @@
 (defn children! []
   (swap! highlight-atom conj :children))
 
-
+(defn surround-with-parens! []
+  
+  )
 
 (action-interpreter "tree-manip" {:left left!
                                   :right right!
                                   :down down!
-                                  :up up!}
+                                  :up up!
+                                  :children children!
+                                  #_:surround-with-parens
+
+                                  }
                     key-chan
                     :after #(println (str "got " % ", path is now " @highlight-atom)))

@@ -9,6 +9,7 @@
                :on-change (fn [e] (reset! atm (.. e -target -value)))}]])
 
 (rum/defc full-tex-display < rum/reactive [tex-atom]
-  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (or (rum/react tex-atom) "")))}}])
+  [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (or (rum/react tex-atom) "")))}}]
+)
 
 

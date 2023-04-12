@@ -6,7 +6,7 @@
             [datascript.core :as ds]))
 
 
-(def db (ds/create-conn))
+(defonce db (ds/create-conn))
 
 (defn atom-from-datascript []
 
@@ -18,20 +18,20 @@
 (defonce toogleoo (switch-atom 2))
 
 
-(def mode (atom :edit)) ;:edit and :tree for now
+(defonce mode (atom :edit)) ;:edit and :tree for now
 
-(def all-real-path (atom false))
+(defonce all-real-path (atom false))
 
-(def tree-atom (atom cas.test-data/default-data))
-(def tex (atom ""))
+(defonce tree-atom (atom cas.test-data/default-data))
+(defonce tex (atom ""))
 (reset! tex (compile-to-tex (first @tree-atom)))
 
-(def was-write-mode-before? (atom false))
+(defonce was-write-mode-before? (atom false))
 
-(def highlight-atom (atom [0]))
-(def show-paths? (atom false))
+(defonce highlight-atom (atom [0]))
+(defonce show-paths? (atom false))
 
-(def highlight-atom-2 (atom nil))
+(defonce highlight-atom-2 (atom nil))
 
 (def keystream (atom '[]))
 (def keystream-tokenized (atom []))

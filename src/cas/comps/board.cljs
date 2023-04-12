@@ -8,46 +8,28 @@
             [cas.state :refer [mode tree-atom tex roadmap atom-map]]
             [cas.keys :refer [key-stream-display]]
             [cas.comps.basics :as basics]
-
             [react]))
-
-(def tokenized-style
-    [:div {:style {:text-align "center" :font-size 24} #_#_:on-click #(reset! keystream '())}
-     [:span {:style { }} #_(if (seq ktoke)
-                           (apply str "tokenized: " (interpose " " ktoke)))]])
-
-
- ;this might be a case for reframe...
-
-
-
-
-
 
 (rum/defc mode-indicator < rum/reactive []
   [:span (str (rum/react mode) "-mode")])
-
-
-
-#_(defn with-indents)
 
 (rum/defc render-roadmap < rum/reactive [rm]
   [:div (for [{ename :name :as entry} rm]
           [:div {:key (:k entry)}
            [:div [:label ename]]
-           [:div [:pre [:code (str (rum/react (atom-map ename)))]]]])])
+           [:div (str (rum/react (atom-map ename)))]])])
 
 
 (defn shove-pipe [s]
   (reset! (atom-map "tokenize-material") s))
 
 (def tholder (atom ""))
+
 (rum/defc backdrop < rum/reactive []
   [:div
    
    (mode-indicator)
    [:hr]
-
 
    [:div [:textarea {:on-change (fn [e] (reset! tholder (.. e -target -value )))}]
 
@@ -57,11 +39,8 @@
    (basics/full-tex-display (atom-map "compiled-to-tex"))
 
 
-
-     
-
    (key-stream-display)
-])
+   ])
 
 
 

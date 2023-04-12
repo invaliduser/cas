@@ -19,8 +19,8 @@
 )
 
 
+(defn init! []
+  (rum/mount (cas.comps/main-comp) (js/document.querySelector "#app"))
+  (refresh-listeners))
 
 
-(rum/mount (cas.comps/main-comp) (js/document.querySelector "#app"))
-
-(refresh-listeners)

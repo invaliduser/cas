@@ -19,9 +19,9 @@
                        0)
                 :limit limit})))
 
-(def views [board/backdrop
-            bench/bench-comp
-            tree-manip/tree-manip-harness])
+(def views [{:component board/backdrop :name "backdrop"}
+            {:component bench/bench-comp :name "bench"}
+            {:component tree-manip/tree-manip-harness :name "tree manipulation harness"}])
 
 
 
@@ -29,6 +29,9 @@
   [:div {:height "100%"}
    [:div
     [:input {:type "button" :on-click #(advance! state/toogleoo) :value "Advance!"}]
-    [:span (str "  Current value: " (:idx (rum/react state/toogleoo)))]
+    [:span (str "  Current value: " (-> (rum/react state/toogleoo) :idx views :name))]
     [:hr]]
-   ((views (:idx (rum/react state/toogleoo))))])
+[:div]
+   ((->  (rum/react state/toogleoo) :idx views :component))
+
+   #_((views (:idx (rum/react state/toogleoo))))])
