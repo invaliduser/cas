@@ -11,7 +11,22 @@ right: inc last
 left: dec last
 
 
-*** a "real" path is one you can use with what's in @tree-atom
+*** a "real" path is one you can use with what's in @tree-atom.  it leads to "a node," which may be a vector
+**** there should *never be more than one zero at the end of a real path*
+**** *the first child of a vector should never be a vector, because it is not a "real" child*
+**** advantage of "real path":  matches actual datastructure
+**** advantage of fake path: corresponds better to meaning---but does it?
+**** in real path, ending in 0 means it's an operation, by looking at path alone
+**** in real path, ending NOT in 0 means don't know whether is vector or value by looking at path alone
+**** however, there is an unambiguous answer to that question, w/tree access
+**** in fake path, *no way to refer to first item of vector*---it's the node as a whole
+**** *I feel like that's bad, they should be able to select + and turn it to -*
+***** up: selects containing node
+***** down: first child
+***** left: left
+***** right: right
+**** *sugar can be written for unintuitive things, but nothing can solve ambiguity or the inability to express*
+
 *** a "fake" path
 * structure
 ** hotkeys

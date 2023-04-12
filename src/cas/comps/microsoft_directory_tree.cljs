@@ -9,21 +9,10 @@
             ))
 
 
-(defn matches-real-path? [node-path highlight-path]
-  (let [np node-path
-        hp highlight-path
-        cnp (count np)
-        chp (count hp)]
-    
-    (or
-                    ;is highlighted directly and specifically
-     (= np hp)
-
-                    ;ancestor is highlighted
-     (= hp (subvec np 0 chp))
-
-     ))
-  )
+(defn matches-real-path? [np hp] ;[node-path highlight-path]; both are real-path
+  (or (= np hp)  ;is highlighted directly and specifically
+   (nodal-descendant hp np)  ;ancestor is highlighted
+   ))
 
 (defn matches-path? [node-path highlight-path]
   (let [cn (count node-path)
@@ -66,16 +55,14 @@
      #_(str (tree-get @tree-atom path) #_(= node-val (get-in @tree-atom path)))]))
 
 (rum/defc node-disp [node path]
-  (if-not (children? node)
-    [:div (node-comp node path)]
-    (into [:div] (concat [(node-comp node path)]
-                         (map-indexed (fn [idx node]
-                                        (let [p (conj path idx)]
-                                          (node-disp node p)))
-                                      (children node))))))
+  (into [:div] (concat [(node-comp node path)]
+                       (map-indexed (fn [idx node]
+                                      (let [p (conj path idx)]
+                                        (node-disp node p)))
+                                    (children node)))))
 
 
-(rum/defc real-path-node-disp [node path]
+#_(rum/defc real-path-node-disp [node path]
   (if-not (children? node)
     [:div (node-comp node path)]
     [:div (concat [(node-comp node path)]
@@ -90,8 +77,10 @@
 
 
 (rum/defc atwrap < rum/reactive [tree-atm]
-  (if @all-real-path
-    (real-path-node-disp (first (rum/react tree-atm)) [0])
+  (cond
+    #_#_(true? @all-real-path)
+    (real-path-node-disp  (first (rum/react tree-atm)) [0])
+    (false? @all-real-path)
     (node-disp (first (rum/react tree-atm)) [0])))
 
                                         ;here beginneth the api
@@ -115,8 +104,8 @@
 (defn children! []
   (swap! highlight-atom conj :children))
 
-(defn surround-with-parens! []
-  
+(defn surround-with-parens! [p]
+  (update-at-path! p)
   )
 
 (action-interpreter "tree-manip" {:left left!
@@ -124,6 +113,10 @@
                                   :down down!
                                   :up up!
                                   :children children!
+                                  :real-up #(swap! highlight-atom cas.tree-ops/real-up)
+                                  :real-down #(swap! highlight-atom cas.tree-ops/real-down)
+                                  :real-left #(swap! highlight-atom cas.tree-ops/real-left)                     
+                                  :real-right #(swap! highlight-atom cas.tree-ops/real-right)
                                   #_:surround-with-parens
 
                                   }
