@@ -26,12 +26,19 @@
    "p" :surround-with-parens
    "r" :replace-with-authoring
    "d" :treat-as-argument-to ;"doto"
+#_#_#_#_#_#_#_#_
    "ArrowRight" :right
    "ArrowLeft" :left
    "ArrowUp" :up
    "ArrowDown" :down
+   "ArrowRight" :real-right
+   "ArrowLeft" :real-left
+   "ArrowUp" :real-up
+   "ArrowDown" :real-down
    "i" :integral
    "=" :equal})
+
+
 
 (defn tree-manip-key-handler [handler]
   (fn [ev]
@@ -100,24 +107,26 @@
 
 (defn send-to-key-chan-listener [handler]
   (fn [ev]
-    (if-let [v (hotkeys-map k)]
-      (do (js/console.log (name v))
-          (go (>! key-chan v))
-          (handler ev))
-      (js/console.log (str k " pressed, no action associated...")))))
+    (let [k (.-key ev)]
+      (if-let [v (hotkeys-map k)]
+        (do (js/console.log (name v))
+            (go (>! key-chan v))
+            (handler ev))
+        (js/console.log (str k " pressed, no action associated..."))))))
 
 (defn write-mode-listener [handler] ;we're not sure what this does...
   (fn [ev]
-    (cond (not (.-ctrlKey ev))
-          (if @was-write-mode-before?
-            (do (swap! keylang-input str k)
-                (full-reset-at-path! @highlight-atom (full @keylang-input)))
-            (reset! was-write-mode-before? true))
+    (let [k (.-key ev)]
+      (cond (not (.-ctrlKey ev))
+            (if @was-write-mode-before?
+              (do (swap! keylang-input str k)
+                  (full-reset-at-path! @highlight-atom (full @keylang-input)))
+              (reset! was-write-mode-before? true))
 
-          #_(if @was-write-mode-before?
-              (append-at-path! @highlight-atom k)
-              (do (reset-at-path! @highlight-atom k)
-                  (reset! was-write-mode-before? true))))))
+            #_(if @was-write-mode-before?
+                (append-at-path! @highlight-atom k)
+                (do (reset-at-path! @highlight-atom k)
+                    (reset! was-write-mode-before? true)))))))
 
 
 (defn great-white-key-listener [ev]

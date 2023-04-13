@@ -31,7 +31,7 @@
   ([v start]
    (subvec v (inclusive-neg v start)))
   ([v start end]
-   (subvec v (inclusive-neg v start) (to-idx v end))))
+   (subvec v (inclusive-neg v start) (exclusive-neg v end))))
 
 (defn remove-last [v]
   (subvec v 0 (dec (count v))))
@@ -85,7 +85,8 @@
 
 
 (defn nodal-descendant [p d] ;the value at (get-in tree d) is contained in (get-in tree p)
-  (= p (subvec d 0 (count p))))
+  (and (<= (count p) (count d))
+       (= p (subvec d 0 (count p)))))
 
 (defn logical-descendant [p d] ;the value at d is the *logical* descendant of the value at p
   (and (= 0 (last p))
@@ -93,7 +94,7 @@
 
 
 
-(defn direct-parent? [p d]
+#_(defn direct-parent? [p d]
   (and   (<=  (- (count d) (count (take-while-matching p d)))
               1)
 

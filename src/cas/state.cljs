@@ -20,7 +20,7 @@
 
 (defonce mode (atom :edit)) ;:edit and :tree for now
 
-(defonce all-real-path (atom false))
+(defonce all-real-path (atom true))
 
 (defonce tree-atom (atom cas.test-data/default-data))
 (defonce tex (atom ""))
