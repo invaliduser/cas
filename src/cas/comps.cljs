@@ -12,12 +12,7 @@
 
 
 
-(defn advance! [atm] ;index vector
-  (swap! atm (fn [{:keys [idx limit]}]
-               {:idx (if (< idx limit)
-                       (inc idx)
-                       0)
-                :limit limit})))
+
 
 (def views [{:component board/backdrop :name "backdrop"}
             {:component bench/bench-comp :name "bench"}
@@ -28,7 +23,7 @@
 (rum/defc main-comp < rum/reactive []
   [:div {:height "100%"}
    [:div
-    [:input {:type "button" :on-click #(advance! state/toogleoo) :value "Advance!"}]
+    [:input {:type "button" :on-click state/advance! :value "Advance!"}]
     [:span (str "  Current value: " (-> (rum/react state/toogleoo) :idx views :name))]
     [:hr]]
 [:div]

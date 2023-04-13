@@ -3,7 +3,7 @@
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path]]
-            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path!]]
+            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]
 
             [cas.chans :refer [key-chan action-interpreter]]
             [cas.shorthand :as sh]
@@ -62,12 +62,7 @@
    
    ]
   
-  (let [content (str node
-                     (str
-                      ", path: " path
-;                      ", nodal: " (nodal-descendant (rum/react highlight-atom) path)
-;                      ",  logical: " (logical-descendant (rum/react highlight-atom) path)
-                      ))]
+  (let [content (str node)]
     [:span {:style {:margin-left (-> (count path)
                                      (+ (if (= (last path) 0) 0 1))
                                      (* 10))
@@ -78,7 +73,7 @@
        (if (or
             ;need one for exact match, e.g. way to highlight a =
             (nodal-descendant (rum/react highlight-atom) path)
-            (logical-descendant (rum/react highlight-atom) path))
+            #_(logical-descendant (rum/react highlight-atom) path))
          [:mark content]
          content)
        (if (rum/react show-paths?) (str "|" path))])) 
@@ -121,7 +116,7 @@
     (true? @all-real-path)
     [:div
      [:div (str @tree-atm)]
-     [:div (real-path-node-disp  (first (rum/react tree-atm)) [0])]]
+     [:div (real-path-node-disp (first (rum/react tree-atm)) [0])]]
     (false? @all-real-path)
     (node-disp (first (rum/react tree-atm)) [0])))
 
@@ -129,38 +124,60 @@
 
 
 
+(defn val-at [p]
+  (get-in @tree-atom p))
 
+(defn current-val []
+  (get-in @tree-atom @highlight-atom))
 
+                      
+                                   
 (defn down! []
-  (swap! highlight-atom conj 0))
+  (cond (vector? (current-val))
+        (swap! highlight-atom conj 1)
+        (= 0 (last @highlight-atom))
+        (swap! highlight-atom vassoc -1 1)
+        :else :nothing)
+
+  #_(swap! highlight-atom cas.tree-ops/down @tree-atom ))
 
 (defn up! []
-  (swap! highlight-atom remove-last))
+  (cond (> (count @highlight-atom) 1)
+        (swap! highlight-atom cas.tree-ops/prim-up @tree-atom)))
 
 (defn left! []
-  (swap! highlight-atom doto-last dec))
+  (swap! highlight-atom cas.tree-ops/left @tree-atom))
 
 (defn right! []
-  (swap! highlight-atom doto-last inc))
+  (swap! highlight-atom cas.tree-ops/right @tree-atom))
+
+(defn select-operator! []
+  (cond (vector? (get-in @tree-atom @highlight-atom))
+        (swap! highlight-atom conj 0)))
 
 (defn children! []
-  (swap! highlight-atom conj :children))
+  (swap! highlight-atom conj :children)) ;unimplemented, but should be---we *do* want to allow for selecting >1 node
 
-#_(defn surround-with-parens! [p]
+(defn select-top! []
+  (reset! highlight-atom [0]))
 
-  )
+(defn surround-with-parens! []
+  (swap! tree-atom update-in @highlight-atom
+         (fn [prev-value] [:paren prev-value])))
+
+(defn raise! []
+  (swap! tree-atom update-in (remove-last @highlight-atom)
+         (fn [prev-value]
+           (prev-value (last @highlight-atom)))))
+
 
 (action-interpreter "tree-manip" {:left left!
                                   :right right!
                                   :down down!
                                   :up up!
-                                  :children children!
-                                  :real-up #(swap! highlight-atom cas.tree-ops/real-up)
-                                  :real-down #(swap! highlight-atom cas.tree-ops/real-down)
-                                  :real-left #(swap! highlight-atom cas.tree-ops/real-left)                     
-                                  :real-right #(swap! highlight-atom cas.tree-ops/real-right)
-                                  #_:surround-with-parens
-
+                                  :select-operator select-operator!
+                                  :surround-with-parens surround-with-parens!
+                                  :select-top select-top!
                                   }
                     key-chan
                     :after #(println (str "got " % ", path is now " @highlight-atom)))

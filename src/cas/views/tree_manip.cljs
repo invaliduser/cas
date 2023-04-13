@@ -13,11 +13,11 @@
 
 (rum/defc top-status < rum/reactive []
   [:div [:span {:on-click #(swap! show-paths? not)}
-         (str "path" (if (rum/react cas.state/all-real-path)
-                       "(T)" "(F)") ":" (rum/react highlight-atom))]])
+           (str "path" (if (rum/react cas.state/all-real-path)
+                         "(T)" "(F)") ":" (rum/react highlight-atom))]])
 
 (rum/defc tree-manip-harness < rum/reactive []
-  [:div (top-status)
+  [:div #_(top-status)
    [:hr]
    (easy-tree/atwrap tree-atom)
    [:hr]

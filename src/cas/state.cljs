@@ -16,7 +16,12 @@
   (atom {:idx 0 :limit limit}))
   
 (defonce toogleoo (switch-atom 2))
-
+(defn advance! [] ;index vector
+  (swap! toogleoo (fn [{:keys [idx limit]}]
+                    {:idx (if (< idx limit)
+                            (inc idx)
+                            0)
+                     :limit limit})))
 
 (defonce mode (atom :edit)) ;:edit and :tree for now
 

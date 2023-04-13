@@ -5,7 +5,7 @@
             [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to-tex :refer [compile-to-tex]]
-            [cas.state :refer [mode tree-atom tex roadmap atom-map]]
+            [cas.state :refer [mode tree-atom tex roadmap atom-map] :as state]
             [cas.keys :refer [key-stream-display]]
             [cas.comps.basics :as basics]
             [react]))
@@ -40,9 +40,12 @@
 
 
    (key-stream-display)
-   ])
-
-
+   [:div [:input {:type "button"
+                  :on-click #(do
+                               (reset! tree-atom [@(state/atom-map "parsed")])
+                               (state/advance!)
+                               (state/advance!))
+                  :value "move to tree"}]]])
 
                                         ;big.
                                         ;toggleable, independent, "views" into the pipeline

@@ -12,37 +12,45 @@
   (:import [goog.events KeyHandler]
            [goog.events.EventType]))
 
+(defn serialize-key-event [ev]
+  (let [adds (set (filter identity [(if (.-ctrlKey ev) :ctrl)
+                                    (if (.-altKey ev) :alt)
+                                    (if (.-shiftKey ev) :shift)]))]
+    (if (seq adds)
+      (into adds (.-key ev))
+      (.-key ev))))
+
+
 (def hotkeys-map
   {
-   ;"w" :start-write-mode
-   ;"e" :start-edit-mode
-   "o" :open
-   "c" :close
+                                        ;"w" :start-write-mode
+                                        ;"e" :start-edit-mode
+   "t" :select-top
+   "o" :select-operator
+   #_#_"c" :close
    "h" :children
    "s" :snapshot
-   ;"m" :minimize
+                                        ;"m" :minimize
 
    "Backspace" :delete
    "p" :surround-with-parens
    "r" :replace-with-authoring
-   "d" :treat-as-argument-to ;"doto"
-#_#_#_#_#_#_#_#_
+   "d" :treat-as-argument-to            ;"doto"
    "ArrowRight" :right
    "ArrowLeft" :left
    "ArrowUp" :up
    "ArrowDown" :down
-   "ArrowRight" :real-right
-   "ArrowLeft" :real-left
-   "ArrowUp" :real-up
-   "ArrowDown" :real-down
    "i" :integral
-   "=" :equal})
+   "=" :equal
+   #{:ctrl "z"} :undo
+   })
 
 
 
 (defn tree-manip-key-handler [handler]
   (fn [ev]
     (let [k (.-key ev)]
+
       (if-let [v (hotkeys-map k)]
         (do (js/console.log (name v))
             (go (>! key-chan v)))
@@ -85,7 +93,7 @@
 
 (defn debug-key-listener [handler]
   (fn [ev]
-    (println "pressed " (.-key ev) " in " @mode " mode")
+    (println "pressed " (serialize-key-event ev) " in " @mode " mode")
     (handler ev)))
 
 (defn mode-switch-listener [handler]
@@ -104,6 +112,12 @@
       (if (not (#{"ArrowRight" "ArrowLeft" "ArrowUp" "ArrowDown"} k))
         (swap! keystream conj k))
       (handler ev))))
+
+(defn default-preventer [handler]
+  (fn [ev]
+
+    #_(.preventDefault ev)
+    (handler ev)))
 
 (defn send-to-key-chan-listener [handler]
   (fn [ev]
@@ -137,6 +151,7 @@
                    true (mode-switch-listener)
                    true (keystream-watch-listener)
                    true (debug-key-listener)
+                   true (default-preventer)
                                         ;keypresses move bottom-up
                    
                    )]

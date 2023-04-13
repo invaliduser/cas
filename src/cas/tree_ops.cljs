@@ -54,17 +54,32 @@
   (mapv inc (rest our-path)))
 
 
-(defn real-up [p] (if (= 0 (last p))
-                    (remove-last p)
-                    (vassoc p -1 0)))
+(defn prim-up [p] (remove-last p))
 
-(defn real-down [p] (if (= 0 (last p))
-                      (vassoc p -1 1)
-                      (conj p 0)))
+(defn prim-down [p tree]
+  (if (vector? (get-in tree p))
+    (conj p 0)
+    (vassoc p -1 1)))
 
-(defn real-right [p] (vupdate p -1 inc))
-(defn real-left [p] (vupdate p -1 dec))
-(comment "these should be changed at some point to go up until they make sense and then sideways")
+(defn prim-right [p] (vupdate p -1 inc))
+(defn prim-left [p] (vupdate p -1 dec))
+
+(defn up [p tree] (prim-up p))
+(defn down [p tree] (prim-down p tree))
+
+(defn left [p tree]
+  (cond (#{0 1} (last p))
+        (do (println "illegal")
+            p)
+        :else (prim-left p)))
+(defn right [p tree]
+  (cond (= 0 (last p))
+        p
+        (> (count (get-in tree (remove-last p))) (inc (last p)))
+        (prim-right p)
+        :else (do (println "illegal")
+                  p)))
+
 
 (defn take-while-matching [a b]
   (let [shortest (min (count a) (count b))]
