@@ -16,12 +16,10 @@
      :paren (fn [item] (str "(" item ")"))
      :plus (fn [item] (str "+" item))
      :minus (fn [item] (str "-" item))
-     :sum (fn [uno & others]
-            (apply str (if (= (first uno) "+")
-                         (stri/replace-first uno #"\+" "")
-                         uno)
-                   others))
-
+     :sum (fn [& items]
+            (apply str items))
+     :+ "+"
+     :- "-"
      :mult (fn [item] (str "*" item))
 
      :dby (fn [item] (str "*\\frac{1}{" item "}"))
@@ -37,8 +35,6 @@
      
                                         ;          :+ (gen-fn-for-commutative-infix "+")
                                         ;          :* (gen-fn-for-commutative-infix "*")
-     :- (fn [f s]
-          (str f "-" s))
      :/  frac-f
 #_#_     :dby frac-f  ;these should be one; users will see it
      :ov frac-f

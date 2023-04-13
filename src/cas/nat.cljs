@@ -245,24 +245,17 @@
    :sum {:precedence 4
          :parselet
          (let [parse #(mparse % (precedence :sum))
-               plus (fn [item] [:plus item])
-               minus (fn [item] [:minus item])
-               gen-sum-pair (fn [op item]
-                              (case op
-                                "pl" (plus item) 
-                                "mi" (minus item)))]
-
+               get-sign {"pl" :+ "mi" :-}]
            (fn [left [op & remainder :as s]]  
-             (let [{:keys [parsed remaining]} (parse remainder)
-                   operands [(plus left) (gen-sum-pair op parsed)]]
-               
-               (loop [operands operands
+             (let [{:keys [parsed remaining]} (parse remainder)  
+                   items [left (get-sign op) parsed]]
+               (loop [items items
                       [lookahead :as remaining] remaining]
                  (if (is? :sum lookahead)
                    (let [{:keys [parsed remaining]} (parse (rest remaining))]
-                     (recur (conj operands (gen-sum-pair lookahead parsed))
+                     (recur (into items [(get-sign lookahead) parsed])
                             remaining))
-                   {:parsed (apply vector :sum operands)
+                   {:parsed (apply vector :sum items)
                     :remaining remaining})))))}
    
    :product {:precedence 5
