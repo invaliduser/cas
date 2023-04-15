@@ -20,22 +20,14 @@
             (apply str items))
      :+ "+"
      :- "-"
-     :mult (fn [item] (str "*" item))
+     :* "\\times"
+     :/ "\\div" ;change to use \frac, or add \frac
+     
+     :product (fn [& items]
+                (apply str items))
 
-     :dby (fn [item] (str "*\\frac{1}{" item "}"))
-     
-     :product (fn [uno & others]
-            (apply str (if (= (first uno) "*")
-                         (stri/replace-first uno #"\*" "")
-                         uno)
-                   others))
-;much work to be done here
-     
 
-     
-                                        ;          :+ (gen-fn-for-commutative-infix "+")
-                                        ;          :* (gen-fn-for-commutative-infix "*")
-     :/  frac-f
+#_#_     :/  frac-f
 #_#_     :dby frac-f  ;these should be one; users will see it
      :ov frac-f
      :exp (fn [f s] (str f "^{" s"}"))

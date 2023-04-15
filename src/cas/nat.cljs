@@ -259,32 +259,27 @@
                     :remaining remaining})))))}
    
    :product {:precedence 5
-              :parselet
-              (let [parse #(mparse % (precedence :product))
-                    mult (fn [item] [:mult item])
-                    dby (fn [item] [:dby item])
-                    gen-prod-pair (fn [op item]
-                                   (case op
-                                     "ti" (mult item)
-                                     "dby" (dby item)
-                                     "ov" (dby item)))]
+             :parselet (let [parse #(mparse % (precedence :product))
+                             get-sign (fn [op]
+                                        (case op
+                                          "ti" :*
+                                          "dby" :/
+                                          "ov" :/ ))]
 
-                (fn [left [op & remainder :as s]]  
-                  (let [{:keys [parsed remaining]} (parse remainder)
-                        operands [(mult left) (gen-prod-pair op parsed)]]
-                    
-                    (loop [operands operands
-                           [lookahead :as remaining] remaining]
+                         (fn [left [op & remainder :as s]]  
+                           (let [{:keys [parsed remaining]} (parse remainder)
+                                 operands [left (get-sign op) parsed]]
+                             
+                             (loop [operands operands
+                                    [lookahead :as remaining] remaining]
 
-                      (if (not (is? :product lookahead)) 
-                        {:parsed (apply vector :product operands)
-                         :remaining remaining}
+                               (if (not (is? :product lookahead)) 
+                                 {:parsed (apply vector :product operands)
+                                  :remaining remaining}
 
-                        (let [{:keys [parsed remaining]} (parse (rest remaining))]
-                          (recur (conj operands (gen-prod-pair lookahead parsed))
-                                 remaining))
-                        
-)))))}
+                                 (let [{:keys [parsed remaining]} (parse (rest remaining))]
+                                   (recur (into operands [(get-sign lookahead) parsed])
+                                          remaining)))))))}
 
    :term {:precedence 6; should be one higher than :product
           :parselet (let [mk-term (fn [l & ns]
