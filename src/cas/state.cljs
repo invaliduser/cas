@@ -31,7 +31,7 @@
 (defonce tex (atom ""))
 (reset! tex (compile-to-tex (first @tree-atom)))
 
-(defonce was-write-mode-before? (atom false))
+(defonce write-buffer (atom nil))
 
 (defonce highlight-atom (atom [0]))
 (defonce show-paths? (atom false))

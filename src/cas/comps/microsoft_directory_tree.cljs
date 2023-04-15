@@ -161,9 +161,13 @@
 (defn select-top! []
   (reset! highlight-atom [0]))
 
-(defn surround-with-parens! []
+(defn toggle-parens! []
   (swap! tree-atom update-in @highlight-atom
-         (fn [prev-value] [:paren prev-value])))
+         (fn [prev-value]
+           (if (and (vector? prev-value)
+                    (= (first prev-value) :paren))
+             (second prev-value)
+             [:paren prev-value]))))
 
 (defn raise! []
   (swap! tree-atom update-in (remove-last @highlight-atom)
@@ -176,7 +180,7 @@
                                   :down down!
                                   :up up!
                                   :select-operator select-operator!
-                                  :surround-with-parens surround-with-parens!
+                                  :toggle-parens toggle-parens!
                                   :select-top select-top!
                                   }
                     key-chan

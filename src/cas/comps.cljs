@@ -23,7 +23,11 @@
   [:div {:height "100%"}
    [:div
     [:input {:type "button" :on-click state/advance! :value "Advance!"}]
-    [:span (str "  Current value: " (-> (rum/react state/toogleoo) :idx views :name))]
+    [:div (str "  Current value: " (-> (rum/react state/toogleoo) :idx views :name))]
+    [:div (str "Mode: " (-> (rum/react state/mode)))]
+    [:div (str "Highlight-atom: " (-> (rum/react cas.state/highlight-atom)))]
+    [:div (str "tree-atom: " (-> (rum/react cas.state/tree-atom)))]
+    [:div (str "keylang-input: " (-> (rum/react cas.state/keylang-input)))]
     [:hr]]
 [:div]
    ((->  (rum/react state/toogleoo) :idx views :component))
