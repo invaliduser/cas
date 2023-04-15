@@ -60,9 +60,9 @@
         res))))
 
 
-(defn over
+(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant
   ([f a k]
-(let [r-atom (atom nil)]
+   (let [r-atom (atom nil)]
      (add-watch a k (fn [k r o n]
                       (reset! r-atom (f @a))))
      r-atom))

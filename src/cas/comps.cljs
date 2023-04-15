@@ -1,6 +1,5 @@
 (ns cas.comps
   (:require [rum.core :as rum]
-            [cas.utils :refer [alert parse]]
             [cas.lang-to-tex]
             [cljs.tools.reader.edn]
             [cas.tex-render]

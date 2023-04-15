@@ -93,6 +93,7 @@
 
 (defn debug-key-listener [handler]
   (fn [ev]
+    (reset! last-key ev)
     (println "pressed " (serialize-key-event ev) " in " @mode " mode")
     (handler ev)))
 
@@ -128,7 +129,7 @@
             (handler ev))
         (js/console.log (str k " pressed, no action associated..."))))))
 
-(defn write-mode-listener [handler] ;we're not sure what this does...
+(defn write-mode-listener [handler]
   (fn [ev]
     (let [k (.-key ev)]
       (cond (not (.-ctrlKey ev))
@@ -146,48 +147,16 @@
 (defn great-white-key-listener [ev]
   (let [pipeline (cond-> identity       ;?
                    true ((key-handlers (:idx @cas.state/toogleoo)))
-;                   (= @mode :edit) (send-to-key-chan-listener)
-;                   (= @mode :write) (write-mode-listener)
+                   (= @mode :edit) (send-to-key-chan-listener)
+                   (= @mode :write) (write-mode-listener)
                    true (mode-switch-listener)
                    true (keystream-watch-listener)
                    true (debug-key-listener)
                    true (default-preventer)
                                         ;keypresses move bottom-up
-                   
                    )]
     (pipeline ev)))
 
-
-(defn key-down-listener [ev]
-  (reset! last-key ev)
-  (let [k (.-key ev)]
-
-    ((tokenizeable-key-handler identity (cas.state/atom-map "tokenize-material"))
-     ev)
-    
-    (println "pressed " k " in " @mode " mode")
-    
-    (if (= k \\)
-      (let [new-mode (case @mode :write :edit :edit :write)]
-        (if (= new-mode :write)
-          (reset! was-write-mode-before? false))
-        (reset! mode new-mode)
-        (println "setting to " new-mode " mode"))
-
-      (do (case @mode
-            :edit
-
-            (if-let [v (hotkeys-map k)]
-              (do (js/console.log (name v))
-                  (go (>! key-chan v)))
-              (js/console.log (str k " pressed, no action associated...")))
-
-            :write              ;getting into write mode is a one-time thing,
-
-            :default nil)
-
-          
-))))
 
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)

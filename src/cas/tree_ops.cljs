@@ -226,22 +226,19 @@ The last item is special."
 ;-----the above two shouldn't exist.  when the below fns call `real-path`, they handle the ambiguity the `vector?` call is necessary for
 
 (defn reset-at-path! [p v]
-  (let [rp (real-path p)]
-    (if (= rp [])
-      (reset! tree-atom [v])
-      (swap! tree-atom assoc-in rp v))))
+  (if (= p [])
+    (reset! tree-atom [v])
+    (swap! tree-atom assoc-in p v)))
 
 (defn full-reset-at-path! [p v]
-  (let [rp (real-path p)]
-    (if (= rp [])
-      (reset! tree-atom v)
-      (swap! tree-atom assoc-in rp v))))
+  (if (= p [])
+    (reset! tree-atom v)
+    (swap! tree-atom assoc-in p v)))
 
 (defn update-at-path! [p f & args]
-  (let [rp (real-path p)]
-    (if (= rp [])
-      (swap! tree-atom  #(apply update-node % f args))
-      (swap! tree-atom update-in (real-path p) #(apply update-node % f args)))))
+  (if (= p [])
+    (swap! tree-atom  #(apply update-node % f args))
+    (swap! tree-atom update-in p #(apply update-node % f args))))
 
 (defn append-at-path! [p v]
   (update-at-path! p (comp js/parseInt str) v))
