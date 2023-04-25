@@ -160,9 +160,12 @@
     (#{"pl" "mi"} token)
     :sum
 
-    (#{"ti" "dby" "ov"} token)
+    (#{"ti" "dby"} token)
     :product
 
+    (= token "ov")
+    :frac
+    
     (#{"pr"} token)
     :prime
 
@@ -257,6 +260,14 @@
                             remaining))
                    {:parsed (apply vector :sum items)
                     :remaining remaining})))))}
+   
+   :frac {:precedence 5 ;?
+          :parselet (fn [left [op & remainder ]]
+                      (let [parse #(mparse % (precedence :frac))
+                            {:keys [parsed remaining]} (parse remainder)]
+                        {:parsed [:frac left parsed]
+                         :remaining remaining}))
+          }
    
    :product {:precedence 5
              :parselet (let [parse #(mparse % (precedence :product))

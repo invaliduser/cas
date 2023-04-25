@@ -11,6 +11,9 @@
    :dby "÷"
    := "="})
 
+(defn operator? [thing]
+  (non-parent-operators thing))
+
 (defn add-attr [node k v]
   (cond (map? (second node))
         (assoc-in node [1 k] v)
@@ -19,11 +22,14 @@
 (def fns
   (let [frac-f (fn [[f s] path] [:mfrac f s])]
     {
+     :/  frac-f
+     :frac frac-f
+     :ov frac-f
      :paren (fn [content path]
-              (into [:mrow]
-                   [[:mo "("]
-                    content
-                    [:mo ")"]]))
+              [:mrow
+               [:mo "("]
+               content
+               [:mo ")"]])
      := (fn [[f s] path]
           [:mrow f [:mo "="] s]) ;change to so =:+::equation:sum
 
@@ -36,9 +42,7 @@
      
      :exp   (fn [[base exp] path] [:msup base exp])
      #_#_:prime (fn [item] (str item "^{\\prime}"))
-     :/  frac-f
-     :frac frac-f
-     :ov frac-f}))
+}))
 
 (defn path-stuff [node path]
   (-> node
@@ -54,13 +58,11 @@
 (rum/defc parent-op-fn < rum/reactive [[kw & args] path]
   (let [f (fns kw)
         children (map-indexed (fn [idx item]
-                                (render-item item (conj path (inc idx))))
+                                (let [new-path  (conj path (inc idx))]
+                                  (rum/with-key (render-item item new-path) new-path))) ;meh
                               args)
         node (f children path)]
-    (path-stuff node path))) ;THINK this may need a conj 0?
-
-(defn operator? [thing]
-  (non-parent-operators thing)) 
+    (path-stuff node path)))
 
 (rum/defc mo < rum/reactive [item path]
   (-> [:mo (non-parent-operators item)]

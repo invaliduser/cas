@@ -15,7 +15,7 @@
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
   
-(def toogleoo (switch-atom 4))
+(def toogleoo (switch-atom 2))
 (defn advance! [] ;index vector
   (swap! toogleoo (fn [{:keys [idx limit]}]
                     {:idx (if (< idx limit)

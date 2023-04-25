@@ -140,7 +140,7 @@
       (cond
         (or (and (= @mode :write)
                  (arrow-keys k))
-            (#{\\ "Enter"} (.-key ev)))
+            (#{\\ "Enter"} (.-key ev))) ;this should maybe be refactored out to somewhere else
         (let [new-mode (case @mode :write :edit :edit :write)]
           (if (= new-mode :write)
             (reset! cas.state/write-buffer  (cursor tree-atom @highlight-atom)))
@@ -217,33 +217,12 @@
                    )]
     (pipeline ev)))
 
-(defn math-field-key-listener [ev]
-  (let [pipeline (cond-> identity       
-                                        ;time to care
-
-                   
-                   #_#_true ((key-handlers (:idx @cas.state/toogleoo)))
-                   #_#_(= @mode :write) (write-mode-listener)
-                   #_#_(= @mode :edit) (tree-manip-key-handler)
-
-                   #_#_true (mode-switch-listener)
-                   true (keystream-watch-listener)
-                   true (default-preventer)
-                   true (debug-key-listener)
-                                        ;keypresses move bottom-up
-                   )]
-    (pipeline ev)))
-
-
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)
                    (.-KEYDOWN events/EventType)
-                   great-white-key-listener
-                   #_key-down-listener)
+                   great-white-key-listener)
 
 
   (events/listen (.-body js/document)
                  (.-KEYDOWN events/EventType)
-                 #_math-field-key-listener
-                 great-white-key-listener
-                 #_key-down-listener))
+                 great-white-key-listener))
