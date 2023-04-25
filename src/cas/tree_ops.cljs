@@ -16,7 +16,6 @@
     (apply update v idx f args)
     (apply update v (+ idx (count v)) f args)))
 
-
 (defn inclusive-neg [v neg-idx?]
   (if (> neg-idx? -1)
     neg-idx?
@@ -80,6 +79,14 @@
         :else (do (println "illegal")
                   p)))
 
+(defn remove-at-index  [v idx]
+  (into (subvec v 0 idx)
+        (subvec v (inc idx))))
+(defn delete-at [tree p]
+  (case (count p)
+    1
+    (remove-at-index tree (last p))
+    (update-in tree (nsubvec p 0 -1) remove-at-index (last p)))) ; there's a pattern to extract here
 
 (defn take-while-matching [a b]
   (let [shortest (min (count a) (count b))]

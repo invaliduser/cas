@@ -73,6 +73,7 @@
    "s" :snapshot
                                         ;"m" :minimize
 
+   "Delete" :delete
    "Backspace" :delete
    "p" :toggle-parens
    "r" :replace-with-authoring
@@ -83,8 +84,9 @@
    "ArrowDown" :down
    "i" :integral
    "=" :equal
-   #{:ctrl "z"} :undo
-   })
+
+
+   #{:ctrl "z"} :undo})
 
 
 
@@ -219,10 +221,10 @@
 
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)
-                   (.-KEYDOWN events/EventType)
+                   (.-KEYDOWN ^js events/EventType)
                    great-white-key-listener)
 
 
   (events/listen (.-body js/document)
-                 (.-KEYDOWN events/EventType)
+                 (.-KEYDOWN ^js events/EventType)
                  great-white-key-listener))

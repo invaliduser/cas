@@ -3,7 +3,7 @@
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path]]
-            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]
+            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]
 
             [cas.chans :refer [key-chan action-interpreter]]
             [cas.shorthand :as sh]))
@@ -119,6 +119,9 @@
 (defn select-top! []
   (reset! highlight-atom [0]))
 
+(defn delete! []
+  (swap! tree-atom delete-at @highlight-atom))
+
 (defn toggle-parens! []
   (swap! tree-atom update-in @highlight-atom
          (fn [prev-value]
@@ -140,6 +143,7 @@
                                   :select-operator select-operator!
                                   :toggle-parens toggle-parens!
                                   :select-top select-top!
+                                  :delete delete!
                                   }
                     key-chan
                     :after #(println (str "got " % ", path is now " @highlight-atom)))

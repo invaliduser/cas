@@ -1,4 +1,5 @@
 
+* TODO Delete-node
 * DONE "crazy toolbox" is what we want
 
 * DONE live rendering of current, and live-rendering of doc, and
@@ -11,18 +12,21 @@
 
 * TODO save hw @ every point
 
+* must have predictable, regular primitives of selection/construction
+
+* "product" etc, should probably just be...a list?
+
+* "list" should be a primitive you have, something like "+ 5" is a lame *mathematical expression*, but a perfectly valid *writing primitive*
+
+* you *do* want some intelligence to prevent things like "5 +", though---removing 6 from "5+6" should automatically turn to "5"
 
 
-
-* disp the tree, disp the latex
-
-
-
-* DONE right side a doc editor, goes straight to latex
-
+* TODO one part a doc editor, goes straight to latex
+** window showing the (unrendered) latex you've written
+** window showing the (rendered) latex you've written
+** latex window fully editable
 
 * TODO I mean, the ideal would be some weird combo of paredit and a viz tool
-
 
 * core operations that you'd want to do:
 ** replace-exp

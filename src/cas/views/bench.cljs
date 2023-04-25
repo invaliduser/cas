@@ -75,7 +75,7 @@
                                    (reset! parsed (utils/parse n))))
 
 (add-watch parsed :texify-and-update (fn [k r o n]
-                                       (let [tex (.toTex n)]
+                                       (let [tex (.toTex ^js n)]
                                          (js/console.log tex)
                                          (reset! texified tex))))
 
