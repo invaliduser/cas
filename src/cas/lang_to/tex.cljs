@@ -1,9 +1,9 @@
-(ns cas.lang-to-tex
+(ns cas.lang-to.tex
   (:require [clojure.string :as stri])
   )
 ;http://manuels.github.io/texlive.js/
 
-(defn gen-fn-for-commutative-infix [op]
+#_(defn gen-fn-for-commutative-infix [op]
   (fn [& operands]
     (let [total-terms  (-> operands count (* 2) dec)]
       (apply str (take total-terms (interleave operands (repeat op)) )))))

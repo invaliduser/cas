@@ -12,6 +12,35 @@
   (:import [goog.events KeyHandler]
            [goog.events.EventType]))
 
+
+
+(deftype Cursor [atm path watches]
+  IAtom
+
+  IDeref
+  (-deref [this]
+    (get-in @atm path))
+  IReset
+  (-reset! [this new-value]
+    (swap! atm assoc-in path new-value))
+  ISwap
+  (-swap! [a f] (-reset! a (f (-deref a))))
+  (-swap! [a f x] (-reset! a (f (-deref a) x)))
+  (-swap! [a f x y] (-reset! a (f (-deref a) x y)))
+  (-swap! [a f x y more] (-reset! a (apply f (-deref a) x y more)))
+
+  IWatchable
+  (-notify-watches [this old new]
+    (doseq [[k f] (.-watches this)]
+      (f k this old new)))
+  (-add-watch [this key f] (let [w (.-watches this)]
+                             (set! (.-watches this) (assoc w key f))))
+  (-remove-watch [this key] (set! (.-watches this) (dissoc (.-watches this) key)))
+  )
+
+(defn cursor [atm path]
+  (->Cursor atm path nil))
+
 (def arrow-keys #{"ArrowRight" "ArrowLeft" "ArrowUp""ArrowDown"})
 
 (defn alt+ [k ev]
@@ -93,7 +122,7 @@
 
 
 ;key handlers are like middleware, taking another handler
-(def key-handlers [#(tokenizeable-key-handler % (cas.state/atom-map "tokenize-material"))
+#_(def key-handlers [#(tokenizeable-key-handler % (cas.state/atom-map "tokenize-material"))
                    identity               ; bench
                    tree-manip-key-handler ;tree-manip
 
@@ -127,41 +156,18 @@
         (swap! keystream conj k))
       (handler ev))))
 
+(def record-atom (atom []))
+
 (defn default-preventer [handler]
   (fn [ev]
+    (swap! record-atom conj (.-key ev))
     (if-not (or (ctrl+ "r" ev)
-                (= "F12" (.-key ev)))
-        (.preventDefault ev))
+                (#{"F12" "Tab" " " "Shift"} (.-key ev)))
+      (.preventDefault ev))
     (handler ev)))
 
 
 
-(deftype Cursor [atm path watches]
-  IAtom
-
-  IDeref
-  (-deref [this]
-    (get-in @atm path))
-  IReset
-  (-reset! [this new-value]
-    (swap! atm assoc-in path new-value))
-  ISwap
-  (-swap! [a f] (-reset! a (f (-deref a))))
-  (-swap! [a f x] (-reset! a (f (-deref a) x)))
-  (-swap! [a f x y] (-reset! a (f (-deref a) x y)))
-  (-swap! [a f x y more] (-reset! a (apply f (-deref a) x y more)))
-
-  IWatchable
-  (-notify-watches [this old new]
-    (doseq [[k f] (.-watches this)]
-      (f k this old new)))
-  (-add-watch [this key f] (let [w (.-watches this)]
-                             (set! (.-watches this) (assoc w key f))))
-  (-remove-watch [this key] (set! (.-watches this) (dissoc (.-watches this) key)))
-  )I
-
-(defn cursor [atm path]
-  (->Cursor atm path nil))
 
 
 
@@ -211,6 +217,23 @@
                    )]
     (pipeline ev)))
 
+(defn math-field-key-listener [ev]
+  (let [pipeline (cond-> identity       
+                                        ;time to care
+
+                   
+                   #_#_true ((key-handlers (:idx @cas.state/toogleoo)))
+                   #_#_(= @mode :write) (write-mode-listener)
+                   #_#_(= @mode :edit) (tree-manip-key-handler)
+
+                   #_#_true (mode-switch-listener)
+                   true (keystream-watch-listener)
+                   true (default-preventer)
+                   true (debug-key-listener)
+                                        ;keypresses move bottom-up
+                   )]
+    (pipeline ev)))
+
 
 (defn refresh-listeners []
   (events/unlisten (.-body js/document)
@@ -218,7 +241,9 @@
                    great-white-key-listener
                    #_key-down-listener)
 
+
   (events/listen (.-body js/document)
                  (.-KEYDOWN events/EventType)
+                 #_math-field-key-listener
                  great-white-key-listener
                  #_key-down-listener))

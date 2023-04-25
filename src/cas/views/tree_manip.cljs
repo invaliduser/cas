@@ -2,7 +2,8 @@
   (:require [rum.core :as rum]
             [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.state :refer [mode tree-atom tex highlight-atom show-paths? roadmap atom-map]]
-            [cas.lang-to-tex :refer [compile-to-tex]]
+            [cas.lang-to.tex :refer [compile-to-tex]]
+            [cas.lang-to.mathml :refer [render-to-mathml]]
             [cas.comps.basics :as basics]))
 
 
@@ -21,4 +22,5 @@
    [:hr]
    (easy-tree/atwrap tree-atom)
    [:hr]
-   (basics/full-tex-display tex)])
+   (render-to-mathml (first @tree-atom)) 
+   #_(basics/full-tex-display tex)])

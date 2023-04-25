@@ -4,9 +4,11 @@
 (defn render-tex [tex]
   (.tex2svg js/MathJax tex))
 
-
+(comment
 "https://github.com/mathjax/MathJax-src/tree/master/ts/a11y"
 
+;getting the highlighter from here
+"https://github.com/mathjax/MathJax-src/blob/8565f9da973238e4c9571a86a4bcb281b1d98d9b/ts/a11y/explorer/Explorer.ts#L261"
 
 
 "https://github.com/mathjax/MathJax-src/blob/master/ts/a11y/explorer/Region.ts"
@@ -33,3 +35,4 @@ basically the goal is to complete the loop!  Can you, from an element click, get
                                         ;good papers by the mathjax team: https://mathjax.github.io/papers/MathUI15/mathui15.pdf
 
 ; https://ieeexplore.ieee.org/document/7444948
+)

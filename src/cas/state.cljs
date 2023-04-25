@@ -1,6 +1,6 @@
 (ns cas.state
   (:require [cas.test-data]
-            [cas.lang-to-tex :refer [compile-to-tex]]
+            [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]))
@@ -15,7 +15,7 @@
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
   
-(defonce toogleoo (switch-atom 2))
+(def toogleoo (switch-atom 4))
 (defn advance! [] ;index vector
   (swap! toogleoo (fn [{:keys [idx limit]}]
                     {:idx (if (< idx limit)

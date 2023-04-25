@@ -4,7 +4,7 @@
             [clojure.walk :as walk]
             [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
-            [cas.lang-to-tex :refer [compile-to-tex]]
+            [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.state :refer [mode tree-atom tex roadmap atom-map] :as state]
             [cas.keys :refer [key-stream-display]]
             [cas.comps.basics :as basics]
