@@ -1,8 +1,7 @@
 (ns cas.lang-to.mathml
   (:require [rum.core :as rum]
-            [cas.state :refer [highlight-atom]]
-            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]
-            ))
+            [cas.state :refer [highlight-atom tree-atom]]
+            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]))
 
 (def non-parent-operators
   {:+ "+"
@@ -60,7 +59,7 @@
         children (map-indexed (fn [idx item]
                                 (let [new-path  (conj path (inc idx))]
                                   (rum/with-key (render-item item new-path) new-path))) ;meh
-                              args)
+                              (filter identity args))
         node (f children path)]
     (path-stuff node path)))
 
@@ -98,7 +97,10 @@
         (mn item path)
 
         (string? item)
-        (mi item path)))
+        (mi item path)
+
+        (nil? item)
+        (do (println "probably shouldn't be nil...here is the tree: " @tree-atom))))
 
 (defn render-to-mathml [manipulang]
   [:math

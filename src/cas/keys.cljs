@@ -14,33 +14,6 @@
 
 
 
-(deftype Cursor [atm path watches]
-  IAtom
-
-  IDeref
-  (-deref [this]
-    (get-in @atm path))
-  IReset
-  (-reset! [this new-value]
-    (swap! atm assoc-in path new-value))
-  ISwap
-  (-swap! [a f] (-reset! a (f (-deref a))))
-  (-swap! [a f x] (-reset! a (f (-deref a) x)))
-  (-swap! [a f x y] (-reset! a (f (-deref a) x y)))
-  (-swap! [a f x y more] (-reset! a (apply f (-deref a) x y more)))
-
-  IWatchable
-  (-notify-watches [this old new]
-    (doseq [[k f] (.-watches this)]
-      (f k this old new)))
-  (-add-watch [this key f] (let [w (.-watches this)]
-                             (set! (.-watches this) (assoc w key f))))
-  (-remove-watch [this key] (set! (.-watches this) (dissoc (.-watches this) key)))
-  )
-
-(defn cursor [atm path]
-  (->Cursor atm path nil))
-
 (def arrow-keys #{"ArrowRight" "ArrowLeft" "ArrowUp""ArrowDown"})
 
 (defn alt+ [k ev]
@@ -145,7 +118,7 @@
             (#{\\ "Enter"} (.-key ev))) ;this should maybe be refactored out to somewhere else
         (let [new-mode (case @mode :write :edit :edit :write)]
           (if (= new-mode :write)
-            (reset! cas.state/write-buffer  (cursor tree-atom @highlight-atom)))
+            (reset! cas.state/write-buffer  (cas.state/cursor tree-atom @highlight-atom)))
           (reset! mode new-mode)
           (reset! keylang-input "")
           (println "setting to " new-mode " mode"))))
@@ -158,11 +131,10 @@
         (swap! keystream conj k))
       (handler ev))))
 
-(def record-atom (atom []))
+
 
 (defn default-preventer [handler]
   (fn [ev]
-    (swap! record-atom conj (.-key ev))
     (if-not (or (ctrl+ "r" ev)
                 (#{"F12" "Tab" " " "Shift"} (.-key ev)))
       (.preventDefault ev))

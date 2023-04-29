@@ -5,6 +5,42 @@
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]))
 
+(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant?
+  ([f a k]
+   (let [r-atom (atom (f @a))]
+     (add-watch a k (fn [k r o n]
+                      (reset! r-atom (f @a))))
+     r-atom))
+  ([f a]
+   (over f a (key-gen))))
+
+(deftype Cursor [atm path watches]
+  IAtom
+
+  IDeref
+  (-deref [this]
+    (get-in @atm path))
+  IReset
+  (-reset! [this new-value]
+    (swap! atm assoc-in path new-value))
+  ISwap
+  (-swap! [a f] (-reset! a (f (-deref a))))
+  (-swap! [a f x] (-reset! a (f (-deref a) x)))
+  (-swap! [a f x y] (-reset! a (f (-deref a) x y)))
+  (-swap! [a f x y more] (-reset! a (apply f (-deref a) x y more)))
+
+  IWatchable
+  (-notify-watches [this old new]
+    (doseq [[k f] (.-watches this)]
+      (f k this old new)))
+  (-add-watch [this key f] (let [w (.-watches this)]
+                             (set! (.-watches this) (assoc w key f))))
+  (-remove-watch [this key] (set! (.-watches this) (dissoc (.-watches this) key)))
+  )
+
+(defn cursor [atm path]
+  (->Cursor atm path nil))
+
 
 (defonce db (ds/create-conn))
 
@@ -14,7 +50,7 @@
 
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
-  
+
 (def toogleoo (switch-atom 2))
 (defn advance! [] ;index vector
   (swap! toogleoo (fn [{:keys [idx limit]}]
@@ -45,9 +81,8 @@
 (def keystream-results (atom '[]))
 (def keystream-undecided (atom '[]))
 
-
-(def last-key (atom nil))
 (def keylang-input (atom ""))
+(def last-key (over last keylang-input))
 #_(add-watch keylang-input :tokenize (fn [k r o n] (reset! keystream-tokenized (tokenize n))))
 
 
@@ -60,14 +95,7 @@
         res))))
 
 
-(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant
-  ([f a k]
-   (let [r-atom (atom nil)]
-     (add-watch a k (fn [k r o n]
-                      (reset! r-atom (f @a))))
-     r-atom))
-  ([f a]
-   (over f a (key-gen))))
+
 
 (def roadmap (map #(-> % (assoc :k (key-gen))
                        (update :f fall-back-to-memo))

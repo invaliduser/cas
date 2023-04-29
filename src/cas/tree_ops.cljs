@@ -39,6 +39,10 @@
   (let [c (count v)]
     (update v (dec c) f)))
 
+(defn replace-last [ve va]
+  (let [c (count ve)]
+    (assoc ve (dec c) va)))
+
 (defn node-val [node]
   (if (vector? node)
     (first node)
@@ -63,30 +67,76 @@
 (defn prim-right [p] (vupdate p -1 inc))
 (defn prim-left [p] (vupdate p -1 dec))
 
+(defn get-currents [leaf]
+  (cond (int? leaf) [leaf (inc leaf)]
+        (vector? leaf) leaf))
+
+(defn at-left-edge? [curr-left] ;left is inclusive, but we don't want to go left from 1=>0
+  (>= 1 curr-left))
+(defn at-right-edge? [curr-right v] ;right is exclusive
+  (>= curr-right (count v)))
+
+(defn extend-right [p tree]
+  (let [leaf (last p)
+        [curr-left curr-right] (get-currents leaf)
+        parent (get-in tree (drop-last p))]
+
+    (if (at-right-edge? curr-right parent) p                  ; if at edge, do nothing
+        (vassoc p -1                ; else
+                [curr-left       ;extending right leaves left as is
+                 (inc curr-right)]))))
+
+(defn extend-left [p tree]
+  (let  [leaf (last p)
+         [curr-left curr-right] (get-currents leaf)]
+    (if (at-left-edge? curr-left) p                                 ; if at edge, do nothing
+        (vassoc p -1                               ; else
+                [(dec curr-left)         ;extending right leaves left as is
+                 curr-right]))))
+
 (defn up [p tree] (prim-up p))
 (defn down [p tree] (prim-down p tree))
 
 (defn left [p tree]
-  (cond (#{0 1} (last p))
-        (do (println "illegal")
-            p)
-        :else (prim-left p)))
+  (let [[curr-left _] (get-currents (last p))]
+    (cond (at-left-edge? curr-left)
+          (do (println "illegal")
+              p)
+          :else (replace-last p (dec curr-left)))))
 (defn right [p tree]
-  (cond (= 0 (last p))
-        p
-        (> (count (get-in tree (remove-last p))) (inc (last p)))
-        (prim-right p)
-        :else (do (println "illegal")
-                  p)))
+  (let [[_ excl-right] (get-currents (last p))] ;excl-right is one higher than actual current right, b/c exclusive
+    (cond (at-right-edge? excl-right (get-in tree (remove-last p)))
+          (do (println "illegal")
+              p)
+          :else
+          (replace-last p excl-right)))) ;seems like doing nothing, 
 
-(defn remove-at-index  [v idx]
-  (into (subvec v 0 idx)
-        (subvec v (inc idx))))
+(defn remove-at-index  [v identifier]
+  (cond (int? identifier)
+        (into (subvec v 0 identifier)
+              (subvec v (inc identifier)))
+        (vector? identifier)
+        (into (subvec v 0 (first identifier))
+              (subvec v  (second identifier)))))
+
 (defn delete-at [tree p]
   (case (count p)
     1
     (remove-at-index tree (last p))
     (update-in tree (nsubvec p 0 -1) remove-at-index (last p)))) ; there's a pattern to extract here
+
+(defn vinsert
+  "idx is either an int or a vector of length 1.  If idx is a vector of length 1, splices in."
+  [ve idx valu]
+  (cond (int? idx)
+        (-> (subvec ve 0 idx)
+            (conj valu)
+            (into (subvec ve idx)))
+
+        (vector? idx)
+        (-> (subvec ve 0 (first idx))
+            (into valu)
+            (into (subvec ve (first idx))))))
 
 (defn take-while-matching [a b]
   (let [shortest (min (count a) (count b))]
@@ -101,12 +151,29 @@
         :else
         (recur (inc idx))))))
 
-;want to iterate through and see if disqualifies
-;when we talk about "ancestor", the in-between relations can be nodal (is a leaf of a branch) or logical (is an arg)
-;
+(defn vget
+  ([v identifier]
+   (cond (int? identifier)
+         (get v identifier)
 
+         (vector? identifier)
+         (subvec v (identifier 0) (inc (identifier 1)))))
+  ([v identifier not-found]
+   (throw "you should probably implement not-found for vget")))
 
-(defn nodal-descendant [p d] ;the value at (get-in tree d) is contained in (get-in tree p)
+(defn vget-in
+  ([m path]
+   (reduce vget m path))
+  ([m path not-found]
+   (throw "you should probably implement not-found for vget-in")))
+
+                                        ;want to iterate through and see if disqualifies
+                                        ;when we talk about "ancestor", the in-between relations can be nodal (is a leaf of a branch) or logical (is an arg)
+
+(defn nodal-descendant
+  ;[parent-path descendant-path]
+  ;the value at (get-in tree d) is contained in (get-in tree p)
+  [p d] 
   (and (<= (count p) (count d))
        (= p (subvec d 0 (count p)))))
 
@@ -117,19 +184,19 @@
 
 
 #_(defn direct-parent? [p d]
-  (and   (<=  (- (count d) (count (take-while-matching p d)))
-              1)
+    (and   (<=  (- (count d) (count (take-while-matching p d)))
+                1)
 
-         (= (remove-last p) (subvec d 0 (dec (count p))))
+           (= (remove-last p) (subvec d 0 (dec (count p))))
 
-         (or
+           (or
                                         ;node parent
-          (and (= (last p) 0)     ;logical parent (within same vector)
-               (not= (last ))
-               )    
-          )
-         )
-  )
+            (and (= (last p) 0)   ;logical parent (within same vector)
+                 (not= (last ))
+                 )    
+            )
+           )
+    )
 
 #_(defn ancestor? [ma md]             ;maybe-ancestor maybe-descendant
                                         ;ma-last ==0, md matches until last, which is !=0

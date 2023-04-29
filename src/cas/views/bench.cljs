@@ -84,7 +84,9 @@
 (doseq [[nom ke] [[left-side :left]
                   [right-side :right]]]
 (add-watch nom :texify-and-update (fn [k r o n]
-                                     (let [tex (-> n utils/parse (.toTex))]
+                                     (let [tex (-> ^js n
+                                                   ^js (utils/parse)
+                                                   (.toTex))]
                                        (swap! eq-parts-atm assoc-in [ke] tex)))))
 (add-watch eq-parts-atm :fix (fn [k r o n] (reset! eq-atom (mk-latex-equation n))))
 

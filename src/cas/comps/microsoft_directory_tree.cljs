@@ -88,15 +88,12 @@
 (defn current-val []
   (get-in @tree-atom @highlight-atom))
 
-                      
-                                   
 (defn down! []
   (cond (vector? (current-val))
         (swap! highlight-atom conj 1)
         (= 0 (last @highlight-atom))
         (swap! highlight-atom vassoc -1 1)
         :else :nothing)
-
   #_(swap! highlight-atom cas.tree-ops/down @tree-atom ))
 
 (defn up! []
@@ -135,7 +132,6 @@
          (fn [prev-value]
            (prev-value (last @highlight-atom)))))
 
-
 (action-interpreter "tree-manip" {:left left!
                                   :right right!
                                   :down down!
@@ -143,7 +139,6 @@
                                   :select-operator select-operator!
                                   :toggle-parens toggle-parens!
                                   :select-top select-top!
-                                  :delete delete!
-                                  }
+                                  :delete delete!}
                     key-chan
                     :after #(println (str "got " % ", path is now " @highlight-atom)))
