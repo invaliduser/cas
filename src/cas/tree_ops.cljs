@@ -80,9 +80,9 @@
         [curr-left curr-right] (get-currents leaf)
         parent (get-in tree (drop-last p))]
 
-    (if (at-right-edge? curr-right parent) p                  ; if at edge, do nothing
-        (vassoc p -1                ; else
-                [curr-left       ;extending right leaves left as is
+    (if (at-right-edge? curr-right parent) p ; if at edge, do nothing
+        (vassoc p -1                         ; else
+                [curr-left        ;extending right leaves left as is
                  (inc curr-right)]))))
 
 (defn extend-left [p tree]
@@ -100,14 +100,14 @@
 (defn left [p tree]
   (let [[curr-left _] (get-currents (last p))]
     (cond (at-left-edge? curr-left)
-          (do (println "illegal")
-              p)
+          (replace-last p 1)
           :else (replace-last p (dec curr-left)))))
 (defn right [p tree]
-  (let [[_ excl-right] (get-currents (last p))] ;excl-right is one higher than actual current right, b/c exclusive
-    (cond (at-right-edge? excl-right (get-in tree (remove-last p)))
-          (do (println "illegal")
-              p)
+  (let [parent  (get-in tree (remove-last p))
+        [_ excl-right] (get-currents (last p))] ;excl-right is one higher than actual current right, b/c exclusive
+    (cond (at-right-edge? excl-right parent)
+          (replace-last p (dec (count parent)))
+
           :else
           (replace-last p excl-right)))) ;seems like doing nothing, 
 
@@ -157,7 +157,7 @@
          (get v identifier)
 
          (vector? identifier)
-         (subvec v (identifier 0) (inc (identifier 1)))))
+         (subvec v (identifier 0) (identifier 1))))
   ([v identifier not-found]
    (throw "you should probably implement not-found for vget")))
 

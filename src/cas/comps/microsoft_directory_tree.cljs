@@ -92,20 +92,23 @@
 
 ;-----the above two shouldn't exist.  when the below fns call `real-path`, they handle the ambiguity the `vector?` call is necessary for
 
+(defn dotota [f & args]
+  (apply swap! tree-atom f args ))
+
 (defn reset-at-path! [p v]
   (if (= p [])
     (reset! tree-atom [v])
-    (swap! tree-atom assoc-in p v)))
+    (dotota assoc-in p v)))
 
 (defn full-reset-at-path! [p v]
   (if (= p [])
     (reset! tree-atom v)
-    (swap! tree-atom assoc-in p v)))
+    (dotota assoc-in p v)))
 
 (defn update-at-path! [p f & args]
   (if (= p [])
-    (swap! tree-atom  #(apply update-node % f args))
-    (swap! tree-atom update-in p #(apply update-node % f args))))
+    (dotota  #(apply update-node % f args))
+    (dotota update-in p #(apply update-node % f args))))
 
 (defn append-at-path! [p v]
   (update-at-path! p (comp js/parseInt str) v))
@@ -114,11 +117,14 @@
   (vget-in @tree-atom p))
 
 (defn down! []
-  (cond (vector? @cas.state/curr-value)
+  (cond (vector? (last @highlight-atom))
+        nil ;we don't go down multiple paths
+
+        (vector? @cas.state/curr-value)
         (swap! highlight-atom conj 1)
         (= 0 (last @highlight-atom))
         (swap! highlight-atom vassoc -1 1)
-        :else :nothing)
+        :else nil)
   #_(swap! highlight-atom cas.tree-ops/down @tree-atom ))
 
 (defn up! []
@@ -141,8 +147,14 @@
 (defn select-top! []
   (reset! highlight-atom [0]))
 
+(defn extend-right! []
+  (swap! highlight-atom cas.tree-ops/extend-right @tree-atom))
+
+(defn extend-left! []
+  (swap! highlight-atom cas.tree-ops/extend-left @tree-atom))
+
 (defn delete! []
-  (swap! tree-atom delete-at @highlight-atom))
+  (dotota delete-at @highlight-atom))
 
 (defn toggle-parens! []
   (swap! tree-atom update-in @highlight-atom
