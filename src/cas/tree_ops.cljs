@@ -174,8 +174,18 @@
   ;[parent-path descendant-path]
   ;the value at (get-in tree d) is contained in (get-in tree p)
   [p d] 
-  (and (<= (count p) (count d))
-       (= p (subvec d 0 (count p)))))
+  (let [cp (count p)]
+    (and (<= cp (count d))
+         (let [lp (last p)
+               md (d (dec cp))]    ;value at d at same index as lp
+           (and (= (remove-last p) (subvec d 0 (dec cp)))
+                (or (and (int? lp)
+                         (= lp md))
+                    (and (vector? lp)
+                         (>= md (first lp))
+                         (< md (last lp)))))))))
+;this is correct, but could be made clearer
+
 
 (defn logical-descendant [p d] ;the value at d is the *logical* descendant of the value at p
   (and (= 0 (last p))
