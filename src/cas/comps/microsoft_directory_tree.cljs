@@ -3,7 +3,7 @@
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path]]
-            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant vassoc vget-in]]
+            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant vassoc vget-in]]
 
             [cas.chans :refer [key-chan action-interpreter]]
             [cas.shorthand :as sh]))
@@ -36,8 +36,8 @@
   #_[:div
    [:span "node: " (str node) ", "]
    [:span "path: " (str path)]
-   [:span "path result: " (str (get-in @tree-atom path ))]
-   [:span ", worked: " (str (= (get-in @tree-atom path) node))]
+   [:span "path result: " (str (vget-in @tree-atom path ))]
+   [:span ", worked: " (str (= (vget-in @tree-atom path) node))]
    [:span ", logical-descendant? " (str (logical-descendant @highlight-atom path))]]
   (let [content (str node)]
     [:span {:style {:margin-left (-> (count path)
@@ -112,8 +112,6 @@
 
 (defn val-at [p]
   (vget-in @tree-atom p))
-
-
 
 (defn down! []
   (cond (vector? @cas.state/curr-value)

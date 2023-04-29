@@ -94,7 +94,8 @@
                  curr-right]))))
 
 (defn up [p tree] (prim-up p))
-(defn down [p tree] (prim-down p tree))
+(defn down [p tree] (cond (int? (last p))
+                          (prim-down p tree)))
 
 (defn left [p tree]
   (let [[curr-left _] (get-currents (last p))]
@@ -266,35 +267,29 @@
      )
     )
 
-(defn tree-get [t p]
-  (let [rp (real-path p)]
-    (if (= rp [])
-      t
-      (get-in t (real-path p)))))
 
-(defn query-get  ;the goal is for this to replace tree-get
-                                        ;this will perhaps not be hard, as tree-get is used only in comments apparently
+;NOTE: obsolete and not working, but may have ideas worth using
+(defn query-get 
   "takes a path, and returns the item(s) at that location
-
 The last item is special."
   [path tree]
   (let [special (last path)]
     (cond (number? special)
-	(get-in tree path)
+	  (get-in tree path)
 
-      :else
-      (let [cr (if (< (count path) 2)
-                 tree
-                (get-in tree (drop-last path)))] ;contextual-root
+          :else
+          (let [cr (if (< (count path) 2)
+                     tree
+                     (get-in tree (drop-last path)))] ;contextual-root
 
-        (cond (vector? special)
-              (subvec cr (first special) (inc (last special)))
+            (cond (vector? special)
+                  (subvec cr (first special) (inc (last special)))
 
-              (= :children special) 
-              (subvec cr 1)
+                  (= :children special) 
+                  (subvec cr 1)
 
-              (= special :all)
-              tree)))))
+                  (= special :all)
+                  tree)))))
 
 #_(comment
   (def tdata  ["=" ["+" 2 3 4] ["-" 999  ["+" 988 2]]])
