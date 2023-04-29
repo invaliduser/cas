@@ -26,6 +26,7 @@
     [:div (str "Highlight-atom: " (-> (rum/react cas.state/highlight-atom)))]
     [:div (str "value at path " (rum/react cas.state/curr-value))]
     [:div (str "keylang-input: " (-> (rum/react cas.state/keylang-input)))]
+    [:div "uncompiled tex: "  (rum/react cas.state/tex) ]
     [:div "tex display:  " (basics/full-tex-display cas.state/tex)]
 
     [:hr]]

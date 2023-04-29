@@ -30,7 +30,7 @@
                                     (if (.-altKey ev) :alt)
                                     (if (.-shiftKey ev) :shift)]))]
     (if (seq adds)
-      (into adds (.-key ev))
+      (conj adds (.-key ev)) ;TODO 
       (.-key ev))))
 
 
@@ -56,15 +56,21 @@
    "ArrowDown" :down
    "i" :integral
    "=" :equal
-
-
+   
+   #{:shift "ArrowRight"} :extend-right
+   #{:shift "ArrowLeft"} :extend-left
+   #{:shift "ArrowUp"} :up
+   #{:ctrl "c"} :copy
+   #{:ctrl "v"} :paste
+   #{:ctrl "x"} :cut
+   
    #{:ctrl "z"} :undo})
 
 
 
 (defn send-to-key-chan-listener [handler]
   (fn [ev]
-    (let [k (.-key ev)]
+    (let [k (serialize-key-event ev)]
       (if-let [v (hotkeys-map k)]
         (do (js/console.log (name v))
             (go (>! key-chan v))
@@ -73,7 +79,7 @@
 
 (defn tree-manip-key-handler [handler]
   (fn [ev]
-    (let [k (.-key ev)]
+    (let [k (serialize-key-event ev)]
       (if-let [v (hotkeys-map k)]
         (do (js/console.log (name v))
             (go (>! key-chan v)))
@@ -106,6 +112,7 @@
   (fn [ev]
     (reset! last-key ev)
     (println "pressed " (serialize-key-event ev) " in " @mode " mode")
+    (js/console.log ev)
     (handler ev)))
 
 (defn mode-switch-listener [handler]

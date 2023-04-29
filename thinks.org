@@ -1,5 +1,15 @@
 
-* TODO Delete-node
+* TODO parens, lists, sums---hmmm
+* TODO select by search
+* TODO edit-by-authoring
+** make it work with range selection
+* TODO insert
+* TODO doto
+** make it work on range selections
+** TODO make parens work w/range selection
+* TODO copy, cut, paste
+* DONE Delete-node
+
 * DONE "crazy toolbox" is what we want
 
 * DONE live rendering of current, and live-rendering of doc, and

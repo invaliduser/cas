@@ -176,6 +176,9 @@
                                   :select-operator select-operator!
                                   :toggle-parens toggle-parens!
                                   :select-top select-top!
-                                  :delete delete!}
+                                  :delete delete!
+                                  :extend-left extend-left!
+                                  :extend-right extend-right!
+                                  }
                     key-chan
                     :after #(println (str "got " % ", path is now " @highlight-atom)))
