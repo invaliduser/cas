@@ -3,7 +3,8 @@
             [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.nat :as nat]
             [cas.utils :refer [key-gen]]
-            [datascript.core :as ds]))
+            [datascript.core :as ds]
+            [cas.tree-ops :refer [vget-in]]))
 
 #_(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant?
   ([f a k]
@@ -88,6 +89,7 @@
 
 (defonce tree-atom (atom cas.test-data/default-data))
 (defonce highlight-atom (atom [0]))
+(defonce curr-value (over vget-in [tree-atom highlight-atom]))
 
 (defonce tex (atom ""))
 (reset! tex (compile-to-tex (first @tree-atom)))

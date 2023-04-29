@@ -24,7 +24,7 @@
     [:div (str "Mode: " (-> (rum/react state/mode)))]
     [:div (str "tree-atom: " (-> (rum/react cas.state/tree-atom)))]
     [:div (str "Highlight-atom: " (-> (rum/react cas.state/highlight-atom)))]
-    [:div (str "value at path " (get-in (rum/react cas.state/tree-atom) (rum/react cas.state/highlight-atom)))]
+    [:div (str "value at path " (rum/react cas.state/curr-value))]
     [:div (str "keylang-input: " (-> (rum/react cas.state/keylang-input)))]
     [:div "tex display:  " (basics/full-tex-display cas.state/tex)]
 

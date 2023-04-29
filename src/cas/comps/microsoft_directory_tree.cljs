@@ -113,11 +113,10 @@
 (defn val-at [p]
   (vget-in @tree-atom p))
 
-(defn current-val []
-  (vget-in @tree-atom @highlight-atom))
+
 
 (defn down! []
-  (cond (vector? (current-val))
+  (cond (vector? @cas.state/curr-value)
         (swap! highlight-atom conj 1)
         (= 0 (last @highlight-atom))
         (swap! highlight-atom vassoc -1 1)

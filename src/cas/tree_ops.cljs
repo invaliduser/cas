@@ -1,5 +1,4 @@
-(ns cas.tree-ops
-  (:require [cas.state :refer [tree-atom]]))
+(ns cas.tree-ops)
 
 (defn children [node] (if (vector? node) (next node) nil))
 
