@@ -4,7 +4,6 @@
             [cljs.core.async :refer [chan <! >! go]]
             [cas.chans :refer [key-chan]]
             [cas.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer]]
-            [cas.tree-ops :refer [reset-at-path! append-at-path! full-reset-at-path!]]
             [cas.manipulang :refer [digits letters]]
             [cas.nat :refer [full]]
             [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]

@@ -3,7 +3,7 @@
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path]]
-            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]
+            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant vassoc vget-in]]
 
             [cas.chans :refer [key-chan action-interpreter]]
             [cas.shorthand :as sh]))
@@ -82,11 +82,39 @@
 
 
 
+
+
+(defn reset-node [node v]
+  v)
+
+(defn update-node [node f & args]
+  (apply f node args))
+
+;-----the above two shouldn't exist.  when the below fns call `real-path`, they handle the ambiguity the `vector?` call is necessary for
+
+(defn reset-at-path! [p v]
+  (if (= p [])
+    (reset! tree-atom [v])
+    (swap! tree-atom assoc-in p v)))
+
+(defn full-reset-at-path! [p v]
+  (if (= p [])
+    (reset! tree-atom v)
+    (swap! tree-atom assoc-in p v)))
+
+(defn update-at-path! [p f & args]
+  (if (= p [])
+    (swap! tree-atom  #(apply update-node % f args))
+    (swap! tree-atom update-in p #(apply update-node % f args))))
+
+(defn append-at-path! [p v]
+  (update-at-path! p (comp js/parseInt str) v))
+
 (defn val-at [p]
-  (get-in @tree-atom p))
+  (vget-in @tree-atom p))
 
 (defn current-val []
-  (get-in @tree-atom @highlight-atom))
+  (vget-in @tree-atom @highlight-atom))
 
 (defn down! []
   (cond (vector? (current-val))
@@ -107,7 +135,7 @@
   (swap! highlight-atom cas.tree-ops/right @tree-atom))
 
 (defn select-operator! []
-  (cond (vector? (get-in @tree-atom @highlight-atom))
+  (cond (vector? (vget-in @tree-atom @highlight-atom))
         (swap! highlight-atom conj 0)))
 
 (defn children! []

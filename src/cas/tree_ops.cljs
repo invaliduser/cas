@@ -178,8 +178,8 @@
     (and (<= cp (count d))
          (let [lp (last p)
                md (d (dec cp))]    ;value at d at same index as lp
-           (and (= (remove-last p) (subvec d 0 (dec cp)))
-                (or (and (int? lp)
+           (and (= (remove-last p) (subvec d 0 (dec cp)))  ;everything but leaf mattches
+                (or (and (int? lp) ;leaf matches
                          (= lp md))
                     (and (vector? lp)
                          (>= md (first lp))
@@ -297,103 +297,7 @@ The last item is special."
               (= special :all)
               tree)))))
 
-
-
-
-
-(defn reset-node [node v]
-  v)
-
-(defn update-node [node f & args]
-  (apply f node args))
-
-;-----the above two shouldn't exist.  when the below fns call `real-path`, they handle the ambiguity the `vector?` call is necessary for
-
-(defn reset-at-path! [p v]
-  (if (= p [])
-    (reset! tree-atom [v])
-    (swap! tree-atom assoc-in p v)))
-
-(defn full-reset-at-path! [p v]
-  (if (= p [])
-    (reset! tree-atom v)
-    (swap! tree-atom assoc-in p v)))
-
-(defn update-at-path! [p f & args]
-  (if (= p [])
-    (swap! tree-atom  #(apply update-node % f args))
-    (swap! tree-atom update-in p #(apply update-node % f args))))
-
-(defn append-at-path! [p v]
-  (update-at-path! p (comp js/parseInt str) v))
-
-
-
-
-;          our-path     ;real-path
-; ["="     [0]           [0]
-;  ["+"    [0 0]         [1 0]          disappeared into the jump
-;     2    [0 0 0]       [1 1]          twice
-;     3    [0 0 1]       [1 2]          predict diff by jump?
-;     4]   [0 0 2]       [1 3] ;col in second incs with col+1 (from left) in left
-;  ["-"    [0 1 ]        [2 0]         
-;    999   [0 1 0]       [2 1]
-;    ["+"  [0 1 1]       [2 2 0]  ;if (last real-path) is 0, is fn
-;      988 [0 1 0 0]     [2 2 1]  ;if lrp !=0, isn't fn
-;      2]]][0 1 0 1]     [2 2 2]  our-path is 1 longer for non-fns
-
-;;so 0 can be ignored for real-path...and should be
-
-
-;          our-path     ;path-of-node
-; ["="     [0]           []
-;  ["+"    [0 0]         [1]   
-;     2    [0 0 0]       [1 1] 
-;     3    [0 0 1]       [1 2] 
-;     4]   [0 0 2]       [1 3] 
-;  ["-"    [0 1 ]        [2]         
-;    999   [0 1 0]       [2 1]
-;    ["+"  [0 1 1]       [2 2] 
-;      988 [0 1 1 0]     [2 2 1]
-;      2]]][0 1 1 1]     [2 2 2]
-
-
-
-
-
 #_(comment
   (def tdata  ["=" ["+" 2 3 4] ["-" 999  ["+" 988 2]]])
 
-
-
-
-  (defn big-juju [p]
-    (node-val (get-in tdata (real-path p )))) ;takes path-to-node and gives val
-
-
-  (defn reverse-juju [p]
-    (tree-get tdata (fake-path p)))
-
-  (def our-paths
-    [[0]
-     [0 0]
-     [0 0 0]
-     [0 0 1]
-     [0 0 2]
-     [0 1]  
-     [0 1 0]
-     [0 1 1]
-     [0 1 1 0]     
-     [0 1 1 1]])
-
-  (def real-paths
-    [[]
-     [1]   
-     [1 1] 
-     [1 2] 
-     [1 3] 
-     [2]         
-     [2 1]
-     [2 2] 
-     [2 2 1]
-     [2 2 2]]))
+)

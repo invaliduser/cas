@@ -1,8 +1,7 @@
 (ns cas.key-commands
   (:require [cas.tree-ops :as to]
             [cas.state :refer [highlight-atom tree-atom]]
-            [cas.tree-ops :refer [update-at-path!]]
-            ))
+            [cas.comps.microsoft-directory-tree :refer [update-at-path!]]))
 
 
 ;AUTHORING

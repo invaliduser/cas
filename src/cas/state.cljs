@@ -5,14 +5,37 @@
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]))
 
-(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant?
+#_(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant?
   ([f a k]
    (let [r-atom (atom (f @a))]
      (add-watch a k (fn [k r o n]
-                      (reset! r-atom (f @a))))
+                      (reset! r-atom (f n))))
      r-atom))
   ([f a]
    (over f a (key-gen))))
+
+; cache/memoize
+; compare timestamps
+; this really ought to be done w/channels maybe
+
+
+(defn over
+  ([f as]
+     (over f as (key-gen)))
+  ([f as k]
+   (cond (vector? as)
+         (let [arg-cache (atom  (vec (map deref as)))
+               r-atom (atom (apply f @arg-cache))]
+           (add-watch arg-cache k (fn [k r o n] (reset! r-atom (apply f n))))
+           (doseq [i (range (count as))]
+             (add-watch (nth as i) (key-gen) (fn [k r o n]
+                                               (swap! arg-cache assoc i n))))
+           r-atom)
+         :else
+         (let [r-atom (atom (f @as))]
+           (add-watch as k (fn [k r o n]
+                             (reset! r-atom (f n))))
+           r-atom))))
 
 (deftype Cursor [atm path watches]
   IAtom
@@ -64,12 +87,14 @@
 (defonce all-real-path (atom true))
 
 (defonce tree-atom (atom cas.test-data/default-data))
+(defonce highlight-atom (atom [0]))
+
 (defonce tex (atom ""))
 (reset! tex (compile-to-tex (first @tree-atom)))
 
 (defonce write-buffer (atom nil))
 
-(defonce highlight-atom (atom [0]))
+
 (defonce show-paths? (atom false))
 
 (defonce highlight-atom-2 (atom nil))

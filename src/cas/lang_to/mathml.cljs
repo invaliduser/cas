@@ -1,7 +1,7 @@
 (ns cas.lang-to.mathml
   (:require [rum.core :as rum]
             [cas.state :refer [highlight-atom tree-atom]]
-            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant update-at-path! vassoc]]))
+            [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val tree-get nodal-descendant logical-descendant vassoc]]))
 
 (def non-parent-operators
   {:+ "+"
