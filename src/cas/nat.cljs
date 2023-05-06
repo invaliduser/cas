@@ -157,10 +157,13 @@
     (#{"eq" "gt" "lt" "leq" "geq"} token)
     :comparison
 
-    (#{"pl" "mi"} token)
+    (#{"pl" "mi" "ti" "dby"} token)
+    :list
+
+    #_#_(#{"pl" "mi"} token)
     :sum
 
-    (#{"ti" "dby"} token)
+    #_#_(#{"ti" "dby"} token)
     :product
 
     (= token "ov")
@@ -186,16 +189,32 @@
 
 (declare precedence)
 (declare get-parser)
+(declare is?)
+
+(defn make-infix-specific [prec kw get-sign]
+  (let [parse #(mparse % prec)]
+    {:precedence prec
+     :parselet (fn [left [op & remainder :as s]]  
+                 (let [{:keys [parsed remaining]} (parse remainder)  
+                       items [left (get-sign op) parsed]]
+                   (loop [items items
+                          [lookahead :as remaining] remaining]
+                     (if (is? kw lookahead)
+                       (let [{:keys [parsed remaining]} (parse (rest remaining))]
+                         (recur (into items [(get-sign lookahead) parsed])
+                                remaining))
+                       {:parsed (apply vector kw items)
+                        :remaining remaining}))))}))
 
 
-(defn signifies-multiplication? [ppe nt]  ;parsed-previous-exp next-token
+(defn signifies-multiplication? [ppe nt] ;parsed-previous-exp next-token
   (case ppe
-      :number (#{:variable :open-paren } nt)
-      :variable (#{:variable :open-paren } nt)
-      :paren (#{:variable :number :open-paren } nt)
-      :exponent (#{:variable :open-paren} nt)
-      :exp (#{:variable :open-paren} nt)
-      :prime (#{:variable :open-paren} nt)))
+    :number (#{:variable :open-paren } nt)
+    :variable (#{:variable :open-paren } nt)
+    :paren (#{:variable :number :open-paren } nt)
+    :exponent (#{:variable :open-paren} nt)
+    :exp (#{:variable :open-paren} nt)
+    :prime (#{:variable :open-paren} nt)))
 
 (defn finish-as-term [r t remainder] ;result type 
 #_#_#_  (sh/debug r)
@@ -210,6 +229,8 @@
 (defn is? [t item]
   (= t (get-type item)))
 
+
+
 (def types-data
   {:close-paren {:precedence -1
                  :parselet (fn [& args] #_[left more #_[op & remainder]]
@@ -223,7 +244,7 @@
 
    :open-paren {:precedence 15
                 :parselet (fn [[op & remainder]]
-#_#_                            (sh/debug op)
+                            #_#_                            (sh/debug op)
                             (sh/debug remainder)
 
                             (let [{:keys [parsed remaining]} (mparse remainder 0)
@@ -245,23 +266,19 @@
                               {:parsed  [comparator left parsed]
                                :remaining remaining}))}
    
-   :sum {:precedence 4
-         :parselet
-         (let [parse #(mparse % (precedence :sum))
-               get-sign {"pl" :+ "mi" :-}]
-           (fn [left [op & remainder :as s]]  
-             (let [{:keys [parsed remaining]} (parse remainder)  
-                   items [left (get-sign op) parsed]]
-               (loop [items items
-                      [lookahead :as remaining] remaining]
-                 (if (is? :sum lookahead)
-                   (let [{:keys [parsed remaining]} (parse (rest remaining))]
-                     (recur (into items [(get-sign lookahead) parsed])
-                            remaining))
-                   {:parsed (apply vector :sum items)
-                    :remaining remaining})))))}
+   :list (make-infix-specific 4 :list {"pl" :+
+                                       "mi" :-
+                                       "ti" :*
+                                       "dby" :/
+                                       "ov" :/})
+
+
+   #_#_:sum (make-infix-specific 4 :sum  {"pl" :+ "mi" :-})
+   #_#_:product  (make-infix-specific 5 :product  {  "pl" :+ "mi" :-"ti" :*
+                                               "dby" :/
+                                               "ov" :/})
    
-   :frac {:precedence 5 ;?
+   :frac {:precedence 5                 ;?
           :parselet (fn [left [op & remainder ]]
                       (let [parse #(mparse % (precedence :frac))
                             {:keys [parsed remaining]} (parse remainder)]
@@ -269,30 +286,9 @@
                          :remaining remaining}))
           }
    
-   :product {:precedence 5
-             :parselet (let [parse #(mparse % (precedence :product))
-                             get-sign (fn [op]
-                                        (case op
-                                          "ti" :*
-                                          "dby" :/
-                                          "ov" :/ ))]
 
-                         (fn [left [op & remainder :as s]]  
-                           (let [{:keys [parsed remaining]} (parse remainder)
-                                 operands [left (get-sign op) parsed]]
-                             
-                             (loop [operands operands
-                                    [lookahead :as remaining] remaining]
 
-                               (if (not (is? :product lookahead)) 
-                                 {:parsed (apply vector :product operands)
-                                  :remaining remaining}
-
-                                 (let [{:keys [parsed remaining]} (parse (rest remaining))]
-                                   (recur (into operands [(get-sign lookahead) parsed])
-                                          remaining)))))))}
-
-   :term {:precedence 6; should be one higher than :product
+   :term {:precedence 6           ; should be one higher than :product
           :parselet (let [mk-term (fn [l & ns]
                                     (let [reducer (fn [acc v]
                                                     (if (is? :term v)
@@ -318,16 +314,16 @@
                              :remaining remaining}))))}
 
 
-;the term stuff:
-   ;numbers should care about what's immediately ahead
-; if they run into a var , it becomes a term
-; if any of these run into a paren...?
-; Nystrom doesn't cover differentiating between a(b) = a*b vs a(b)= apply a to b
-;one wonders if this is something you handle at the logic layer instead?
-   ; yeah, it has to be.
+                                        ;the term stuff:
+                                        ;numbers should care about what's immediately ahead
+                                        ; if they run into a var , it becomes a term
+                                        ; if any of these run into a paren...?
+                                        ; Nystrom doesn't cover differentiating between a(b) = a*b vs a(b)= apply a to b
+                                        ;one wonders if this is something you handle at the logic layer instead?
+                                        ; yeah, it has to be.
 
-   ;again, a really good authoring/editing experience trumps relation-awareness
-   ;anyway: numbers!
+                                        ;again, a really good authoring/editing experience trumps relation-awareness
+                                        ;anyway: numbers!
    :number {:precedence 9
             :parselet (let [parse #(mparse % (precedence :number))
                             numerical? (fn [toke]
@@ -395,7 +391,7 @@
                        (finish-as-term  [:prime left] :prime remainder)
 
                        #_{:parsed [:prime left]
-                        :remaining remainder})}
+                          :remaining remainder})}
 
 
    
@@ -405,9 +401,9 @@
                           (finish-as-term v :variable remainder)
 
                           #_{:parsed 'sfjlk
-                           :remaining remainder #_(mparse remainder (precedence :variable))})}
+                             :remaining remainder #_(mparse remainder (precedence :variable))})}
 
-})
+   })
 
 
 
@@ -419,14 +415,18 @@
                   (get-type token-or-type))]
     (-> token-or-type get-type types-data :parselet)))
 
+
+
 (defn precedence [token-or-type]
   (-> token-or-type get-type types-data :precedence)
   #_(let [typpe (or (and (keyword? token-or-type) token-or-type)
                     (get-type token-or-type))]
       (-> token-or-type get-type types-data :precedence)))
 
+
+
 #_(defn precedence2 [type] ;should be typifying tokens and using this everywhere, but...
-  (-> typpe types-data :precedence))
+    (-> typpe types-data :precedence))
 
 #_(defn get-parser2 [type]
   (-> typpe types-data :parselet))

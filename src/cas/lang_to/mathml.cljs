@@ -32,6 +32,8 @@
      := (fn [[f s] path]
           [:mrow f [:mo "="] s]) ;change to so =:+::equation:sum
 
+     :list (fn [items path]
+             (into [:mrow] items))
      :sum (fn [items path]
             (into [:mrow] items))
      :product (fn [items path]

@@ -18,13 +18,17 @@
      :minus (fn [item] (str "-" item))
      :sum (fn [& items]
             (apply str items))
+     :product (fn [& items]
+                (apply str items))
+     :list (fn [& items]
+             (apply str items))
+     
      :+ "+"
      :- "-"
      :* "\\times"
      :/ "\\div" ;change to use \frac, or add \frac
      
-     :product (fn [& items]
-                (apply str items))
+
 
 
 #_#_     :/  frac-f
