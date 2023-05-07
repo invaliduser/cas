@@ -2,8 +2,8 @@
   (:require [rum.core :as rum]
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
-            [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path]]
-            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant vassoc vget-in]]
+            [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path curr-value parent-path]]
+            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice]]
 
             [cas.chans :refer [key-chan action-interpreter]]
             [cas.shorthand :as sh]))
@@ -157,12 +157,57 @@
   (dotota delete-at @highlight-atom))
 
 (defn toggle-parens! []
-  (swap! tree-atom update-in @highlight-atom
-         (fn [prev-value]
-           (if (and (vector? prev-value)
-                    (= (first prev-value) :paren))
-             (second prev-value)
-             [:paren prev-value]))))
+  (let [prev @curr-value
+          lp (last @highlight-atom)
+        
+          type (cond (vector? lp)   ;:range within list/parens     ;wrap in parens
+                     (do (swap! tree-atom update-in @parent-path #(-> %
+                                                                     (vremove (first lp) (second lp))
+                                                                     (vinsert (first lp) (into [:paren] prev))))
+                         (swap! highlight-atom replace-last (first lp)))
+
+                     (not (vector? prev))
+                     (swap! tree-atom assoc-in @highlight-atom [:paren prev])
+                     
+                     (vector? prev)
+                     (case (first prev)
+                                        ;:paren             ;remove parens and splice
+                       :paren
+                       (do (swap! tree-atom update-in @parent-path #(-> %
+                                                                        (vremove lp)
+                                                                        (vsplice lp (rest prev))))
+                           (if (> (count prev) 2)
+                             (swap! highlight-atom replace-last [lp (+ lp (dec (count prev)))])))
+                       :list
+                       (do (swap! tree-atom assoc-in @highlight-atom [:list
+                                                                      (into [:paren]
+                                                                            (rest prev))])
+                           (swap! highlight-atom conj 1))
+
+                       (swap! tree-atom assoc-in @highlight-atom [:paren prev]))
+                     
+
+
+                     
+                     ;:tagged-list ;literally should only matter at top level of expression
+                     ;but currently shows up anywhere there's an infix i think
+                     
+                     #_(vector? prev)
+                     ;:non-composite ;is now first (and only) member of :paren
+                     )
+
+        
+
+        ]
+
+      )
+
+  #_(dotota update-in @highlight-atom
+          (fn [prev-value]
+            (if (and (vector? prev-value)
+                     (= (first prev-value) :paren))
+              (second prev-value)
+              [:paren prev-value]))))
 
 (defn raise! []
   (swap! tree-atom update-in (remove-last @highlight-atom)

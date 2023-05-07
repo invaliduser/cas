@@ -1,35 +1,66 @@
 (ns cas.tree-ops)
 
+(defn contents [data]
+  (if (not (vector? data))
+    data
+    (case (first data)
+      :paren (rest data)
+      :list (rest data)
+      data)))
+
+
+
+#_(defn accept [ve path data]          ;path shouldn't have vec at end
+    (let [parent (get-in ve (drop-last path))
+          parent-type
+          datatype
+          ]
+    
+      )
+    )
+
+
+
 (defn children [node] (if (vector? node) (next node) nil))
 
 (def children? children)
 (defn represents-fn? [p] (= 0 (last p)))
 
-(defn vassoc [v idx nv]
-  (if (> idx -1)
-    (assoc v idx nv)
-    (assoc v (+ idx (count v)) nv)))
-
-(defn vupdate [v idx f & args]
-  (if (> idx -1)
-    (apply update v idx f args)
-    (apply update v (+ idx (count v)) f args)))
-
-(defn inclusive-neg [v neg-idx?]
-  (if (> neg-idx? -1)
-    neg-idx?
-    (+ neg-idx? (dec (count v)))))
-
-(defn exclusive-neg [v neg-idx?]
+(defn neg-idx
+  "takes a vector and a (possibly negative) index, converting the idx if necessary (-1 is last, -2 is second to last, etc).  inclusuive"
+  [v neg-idx?]
   (if (> neg-idx? -1)
     neg-idx?
     (+ neg-idx? (count v))))
 
-(defn nsubvec
-  ([v start]
-   (subvec v (inclusive-neg v start)))
-  ([v start end]
-   (subvec v (inclusive-neg v start) (exclusive-neg v end))))
+(defn vassoc
+  "like assoc, but a) only for vectors, and b) takes negative integers as  indexes (-1 is last)"
+  [v idx nv]
+  (assoc v (neg-idx v idx) nv))
+
+(defn vupdate
+  "like update, but a) only for vectors, and b) takes negative integers as  indexes (-1 is last)"
+  [v idx f & args]
+  (apply update (neg-idx v idx) f args))
+
+
+
+
+
+
+
+(defn remove-at-index  [v idx]
+  (into (subvec v 0 idx)
+        (subvec v (inc idx))))
+
+(defn remove-range [v [beg end]]
+  (into (subvec v 0 beg)
+        (subvec v end)))
+
+(defn vremove [v idx & [idx2]]
+  (let [idx (neg-idx v idx)]
+    (-> (subvec v 0 idx)
+        (into (subvec v (if idx2 (neg-idx v idx2) (inc idx)))))))
 
 (defn remove-last [v]
   (subvec v 0 (dec (count v))))
@@ -39,15 +70,30 @@
     (update v (dec c) f)))
 
 (defn replace-last [ve va]
-  (let [c (count ve)]
-    (assoc ve (dec c) va)))
+  (assoc ve (dec (count ve)) va))
+
+(defn vget
+  ([v idx]
+   (cond (int? idx)
+         (v (neg-idx v idx))
+         (vector? idx)
+         (->> idx
+              (map (partial neg-idx v))
+              (apply subvec v))))
+
+  ([v identifier not-found]
+   (throw "you should probably implement not-found for vget")))
+
+(defn vget-in
+  ([m path]
+   (reduce vget m path))
+  ([m path not-found]
+   (throw "you should probably implement not-found for vget-in")))
 
 (defn node-val [node]
   (if (vector? node)
     (first node)
     node))
-
-
 
 
 (defn fake-path [real-path]    ;real path-to-node -> fake-path-to-node
@@ -111,32 +157,63 @@
           :else
           (replace-last p excl-right)))) ;seems like doing nothing, 
 
-(defn remove-at-index  [v identifier]
-  (cond (int? identifier)
-        (into (subvec v 0 identifier)
-              (subvec v (inc identifier)))
-        (vector? identifier)
-        (into (subvec v 0 (first identifier))
-              (subvec v  (second identifier)))))
+ ; there's a pattern to extract here
+
+(defn vinsert [ve idx valu]
+  (->  (subvec ve 0 idx)
+       (conj valu)
+       (into (subvec ve idx))))
+
+(defn vsplice [ve idx vals]
+  (-> (subvec ve 0 idx)
+      (into vals)
+      (into (subvec ve idx))))
+
+(defn splice-up [ve idx]
+    (-> (subvec ve 0 idx)
+      (into (ve idx))
+      (into (subvec ve (inc idx)))))
+
+
+                                        ;three features I want:
+                                        ; - splice
+                                        ; negative indices
+                                        ; indice ranges
+                                        ;
+                                        ; higher level stuff:
+                                        ; splice-out
+
+(defn vinsert-in
+  [ve [idx & idxs] valu]
+  (if idxs
+    (assoc ve idx (vinsert-in (ve idx) idxs valu))
+    (vinsert ve idx valu)))
+
+(defn vreplace
+  "idx is either a vector or a doubly-nested vector"
+  [ve idx valu]
+  (let [[idx splice?] (if (vector? (first idx))
+                        [(first idx) true]
+                        [idx false])
+        [beg end] (if (int? idx) [idx idx] idx)
+        add (if splice?
+              (do (assert (coll? valu))
+                  into)
+              conj)]
+    (-> (subvec ve 0 beg)
+        (add valu)
+        (into (subvec ve end)))))
+
+(defn vreplace-in [ve [idx & idxs] valu]
+  (if idxs
+    (assoc ve idx (vreplace-in (ve idx) idxs valu))
+    (vreplace ve idx valu)))
 
 (defn delete-at [tree p]
   (case (count p)
     1
     (remove-at-index tree (last p))
-    (update-in tree (nsubvec p 0 -1) remove-at-index (last p)))) ; there's a pattern to extract here
-
-(defn vinsert
-  "idx is either an int or a vector of length 1.  If idx is a vector of length 1, splices in."
-  [ve idx valu]
-  (cond (int? idx)
-        (-> (subvec ve 0 idx)
-            (conj valu)
-            (into (subvec ve idx)))
-
-        (vector? idx)
-        (-> (subvec ve 0 (first idx))
-            (into valu)
-            (into (subvec ve (first idx))))))
+    (update-in tree (remove-last p) remove-at-index (last p))))
 
 (defn take-while-matching [a b]
   (let [shortest (min (count a) (count b))]
@@ -151,21 +228,6 @@
         :else
         (recur (inc idx))))))
 
-(defn vget
-  ([v identifier]
-   (cond (int? identifier)
-         (get v identifier)
-
-         (vector? identifier)
-         (subvec v (identifier 0) (identifier 1))))
-  ([v identifier not-found]
-   (throw "you should probably implement not-found for vget")))
-
-(defn vget-in
-  ([m path]
-   (reduce vget m path))
-  ([m path not-found]
-   (throw "you should probably implement not-found for vget-in")))
 
                                         ;want to iterate through and see if disqualifies
                                         ;when we talk about "ancestor", the in-between relations can be nodal (is a leaf of a branch) or logical (is an arg)
@@ -291,7 +353,8 @@ The last item is special."
                   (= special :all)
                   tree)))))
 
-#_(comment
-  (def tdata  ["=" ["+" 2 3 4] ["-" 999  ["+" 988 2]]])
 
-)
+#_(comment
+    (def tdata  ["=" ["+" 2 3 4] ["-" 999  ["+" 988 2]]])
+
+    )

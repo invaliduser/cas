@@ -4,7 +4,7 @@
             [cas.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]
-            [cas.tree-ops :refer [vget-in]]))
+            [cas.tree-ops :refer [vget-in remove-last]]))
 
 #_(defn over ; takes a fn and an atom, returns a new atom guaranteed to be (f @a).  feels redundant?
   ([f a k]
@@ -89,7 +89,9 @@
 
 (defonce tree-atom (atom cas.test-data/default-data))
 (defonce highlight-atom (atom [0]))
+(defonce parent-value (over #(get-in % (drop-last %2)) [tree-atom highlight-atom]))
 (defonce curr-value (over vget-in [tree-atom highlight-atom]))
+(defonce parent-path (over remove-last [highlight-atom]))
 
 (defonce tex (atom ""))
 (reset! tex (compile-to-tex (first @tree-atom)))

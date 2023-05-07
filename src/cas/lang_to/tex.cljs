@@ -13,7 +13,7 @@
                   (str "\\frac{" f "}{" s "}"))]
     {:= (fn [f s] (str f "=" s))
 
-     :paren (fn [item] (str "(" item ")"))
+     :paren (fn [& items] (str "(" (apply str items) ")"))
      :plus (fn [item] (str "+" item))
      :minus (fn [item] (str "-" item))
      :sum (fn [& items]
