@@ -1,5 +1,21 @@
 
+* TODO lists in lists should auto-flatten
+** TODO limited # of types: lists, fns w/definite args, parens
+*** not actually that hard to have ui affordances for this: lists you just type, fns you can accept an "enter" event, parens...parens
 * TODO parens, lists, sums---hmmm
+** gonna have multiple paradigms here---navigate by text, by s-expression, etc---it's ok to have multiple, but user should know which and it should be internally consistent
+** any compound/grouping (parens, sums, lists, etc) should have similar ui in extending
+** what to do with with "functions" like frac that are lists-of-lists?
+** list-as-made-by-infix is dumb
+*** obj hierarchy
+*** statement: #{equation, inequality, \exists, etc} tree---but let's avoid!
+*** equation: [expression [= expression]*]    <-- list!   
+*** expression: [term [infix term]*]          <-- list!
+*** term: [call | identifer]+                 <--list!
+*** identifier: [0-9a-z]                  
+*** call [operator expression+]               tree
+*** 
+* TODO extend-paren left/right
 * TODO select by search
 * TODO edit-by-authoring
 ** make it work with range selection
