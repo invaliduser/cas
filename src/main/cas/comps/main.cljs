@@ -1,4 +1,4 @@
-(ns cas.comps
+(ns cas.comps.main
   (:require [rum.core :as rum]
             [cas.lang-to.tex]
             [cljs.tools.reader.edn]

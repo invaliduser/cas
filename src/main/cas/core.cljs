@@ -1,7 +1,7 @@
 (ns cas.core
   (:require [cas.utils :refer [alert]]
             [rum.core :as rum]
-            [cas.comps]
+            [cas.comps.main]
             [cas.keys :refer [refresh-listeners]]))
 
 
@@ -20,7 +20,7 @@
 
 
 (defn init! []
-  (rum/mount (cas.comps/main-comp) (js/document.querySelector "#app"))
+  (rum/mount (cas.comps.main/main-comp) (js/document.querySelector "#app"))
   (refresh-listeners))
 
 
