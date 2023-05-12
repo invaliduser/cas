@@ -1,4 +1,4 @@
-(ns cas.core
+(ns cas.backend.core
   (:require
    [ring.adapter.jetty :as jetty]
    [ring.middleware.file :refer [wrap-file]]
