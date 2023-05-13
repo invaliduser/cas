@@ -1,10 +1,15 @@
 (ns user
   (:require
+   [cas.backend.core :as app-server]
    [shadow.cljs.devtools.api :as shadow]
-   [shadow.cljs.devtools.server :as server]))
+   [shadow.cljs.devtools.server :as shadow-server]))
 
 
 (defn cljs []
-  (server/start!)
+  (when (nil? @app-server/server)
+    (app-server/start!))
+  (shadow-server/start!)
   (shadow/watch :app)
   (shadow/nrepl-select :app))
+
+
