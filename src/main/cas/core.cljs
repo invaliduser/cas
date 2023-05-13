@@ -1,8 +1,9 @@
 (ns cas.core
   (:require [cas.utils :refer [alert]]
             [rum.core :as rum]
-            [cas.comps]
-            [cas.keys :refer [refresh-listeners]]))
+            [cas.comps.main]
+            [cas.keys :refer [refresh-listeners]]
+            [cas.routing]))
 
 
 (set! *warn-on-infer* true)
@@ -20,7 +21,11 @@
 
 
 (defn init! []
-  (rum/mount (cas.comps/main-comp) (js/document.querySelector "#app"))
+  (cas.routing/start!)
+  (rum/mount
+   #_(cas.comps.main/main-comp)
+   (cas.routing/routing-component)
+   (js/document.querySelector "#app"))
   (refresh-listeners))
 
 

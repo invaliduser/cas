@@ -4,20 +4,6 @@
 (def alert js/alert)
 (declare evaluate compile parse simplify)
 
-#_(cas.shorthand/pull-in js/math
-                       '[evaluate
-                         compile
-                         parse
-                         simplify])
-
-(def evaluate (.-evaluate js/math))
-(def compile (.-compile js/math))
-(def parse (.-parse js/math))
-(def simplify (.-simplify js/math))
-
-
-
-
 
 (def letters #{\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z})
 

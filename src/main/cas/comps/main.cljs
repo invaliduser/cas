@@ -1,4 +1,4 @@
-(ns cas.comps
+(ns cas.comps.main
   (:require [rum.core :as rum]
             [cas.lang-to.tex]
             [cljs.tools.reader.edn]
@@ -9,8 +9,6 @@
             [cas.views.tree-manip :as tree-manip]
             [cas.state :as state]
             [cas.shorthand :as sh]))
-
-
 
 (def views [{:component tree-manip/tree-manip-harness :name "tree manipulation harness"}
             {:component board/backdrop :name "backdrop"}

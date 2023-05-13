@@ -22,4 +22,5 @@
                                       :join? false})))
 
 (defn stop! []
-  (.stop @server))
+  (.stop @server)
+  (reset! server nil))

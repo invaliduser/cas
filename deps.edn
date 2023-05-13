@@ -9,7 +9,8 @@
         automat/automat {:mvn/version "0.2.4"}
         instaparse/instaparse {:mvn/version "1.4.10"}
         datascript/datascript {:mvn/version "1.0.4"}
-        com.taoensso/tufte {:mvn/version "2.1.0"}}
+        com.taoensso/tufte {:mvn/version "2.1.0"}
+        metosin/reitit {:mvn/version "0.7.0-alpha3"}}
  
 
  :aliases {:app {:exec-fn cas.core/do-it}
