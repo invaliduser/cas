@@ -2,7 +2,9 @@
   (:require [reitit.frontend.easy :as rfe]
             [rum.core :as rum]
             [reitit.frontend :as rf]
-            [cas.views.dev]))
+            [cas.views.cockpit]
+            [cas.views.dev]
+            [cas.views.tree-manip :as tree-manip]))
 
 (rum/defc placeholder []
   "hi there")
@@ -21,11 +23,15 @@
 (rum/defc basic-component []
   "basic component, reachable only by routing")
 
-
 (def opts {:use-fragment false})
 (def routes
   [["/" basic-component]
-   ["/dev" cas.views.dev/dev-page]])
+   ["/dev" cas.views.dev/dev-page]
+   ["/tree-manip" tree-manip/tree-manip-harness]
+   ["/cockpit" cas.views.cockpit/cockpit-page]
+   
+
+])
 
 (def router (rf/router routes))
 

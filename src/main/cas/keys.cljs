@@ -4,7 +4,6 @@
             [cljs.core.async :refer [chan <! >! go]]
             [cas.chans :refer [key-chan]]
             [cas.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer]]
-            [cas.manipulang :refer [digits letters]]
             [cas.nat :refer [full]]
             [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]
             [cas.shorthand :as sh])
@@ -124,7 +123,7 @@
             (#{\\ "Enter"} (.-key ev))) ;this should maybe be refactored out to somewhere else
         (let [new-mode (case @mode :write :edit :edit :write)]
           (if (= new-mode :write)
-            (reset! cas.state/write-buffer  (cas.state/cursor tree-atom @highlight-atom)))
+            (reset! cas.state/write-buffer  (rum.core/cursor-in tree-atom @highlight-atom)))
           (reset! mode new-mode)
           (reset! keylang-input "")
           (println "setting to " new-mode " mode"))))
