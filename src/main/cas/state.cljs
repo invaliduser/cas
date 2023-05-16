@@ -130,7 +130,7 @@
 (defn fall-back-to-memo [f]
   (let [holder (atom "")]
     (fn [& args]
-      (println "running a calc fn!  memo'd value is:" @holder)
+      #_(println "running a calc fn!  memo'd value is:" @holder)
       (let [res (try (reset! holder (apply f args))
                      (catch js/Error e @holder))]
         res))))

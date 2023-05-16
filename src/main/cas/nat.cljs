@@ -439,7 +439,7 @@
 
 
 (defn mparse [[token & remainder :as s] prec-val]
-  (println "running mparse!" s prec-val)
+  #_(println "running mparse!" s prec-val)
   (if token
     (let [parser (get-parser token)
           state (parser s)]    ;first, parse "once" according to type of first token

@@ -1,5 +1,5 @@
 (ns cas.rpn
-  (:require [cljs.core.async :refer [chan <! >! go]]))
+  #_(:require [cljs.core.async :refer [chan <! >! go]]))
 
 (def stack (atom '()))
 

@@ -4,7 +4,6 @@
 
 (def key-chan (chan))
 
-
 (defn action-interpreter [nom m c & {:keys [before after]}] ;name map chan 
   (println (str "starting " nom " listener..."))
   (go-loop []
@@ -15,4 +14,12 @@
             (after e))
         (do (throw (js/Error.  (str "action-interpreter " nom " got signal of " e ", but no action registered." ))))))
       (recur)))
+
+
+
+#_(let [backend-chan (chan)]
+  (go
+    (<! backend-chan))
+  )
+
 
