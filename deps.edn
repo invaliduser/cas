@@ -11,7 +11,8 @@
         datascript/datascript {:mvn/version "1.0.4"}
         cljs-ajax/cljs-ajax {:mvn/version "0.8.4"}
         com.taoensso/tufte {:mvn/version "2.1.0"}
-        metosin/reitit {:mvn/version "0.7.0-alpha3"}}
+        metosin/reitit {:mvn/version "0.7.0-alpha3"}
+        metosin/muuntaja "0.6.8"}
  
 
  :aliases {:app {:exec-fn cas.core/do-it}

@@ -1,5 +1,6 @@
 (ns cas.chans
   (:require
+   [ajax.core :as ajax]
    [cljs.core.async :refer [chan <! >! go-loop]]))
 
 (def key-chan (chan))
@@ -16,7 +17,12 @@
       (recur)))
 
 
-
+(comment
+  (require '[cas.state :as state])
+  (ajax/POST "/api/latex-compile" {:params @state/tex
+                                   :handler println
+                                   #_#_:body 24})
+  ) 
 #_(let [backend-chan (chan)]
   (go
     (<! backend-chan))

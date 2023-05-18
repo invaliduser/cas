@@ -15,6 +15,13 @@
      (println ~(str form) ": "  (str res#))
      res#))
 
+(defmacro store-debug [sym form]
+  `(do
+     (defonce ~sym (atom []))
+      (let [res# ~form]
+        (swap! ~sym conj res#)
+        res#)))
+
 (defn print-retain [item]
   (println item)
   item)
