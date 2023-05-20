@@ -1,16 +1,8 @@
 ;; shadow-cljs configuration
 {:source-paths
- ["src/main"]
+ [""] ;src/main, set in deps.edn
   
  :deps true
- #_#_:dependencies
- [[devcards "0.2.7"]
-  [rum "0.12.10"]
-  [org.clojure/core.async "0.7.559"]
-  [automat "0.2.4"]
-  [instaparse "1.4.10"]
-  [datascript "1.0.4"]
-  [com.taoensso/tufte "2.1.0"]]
 
 #_#_:dev-http
  {3000 "resources/public"}

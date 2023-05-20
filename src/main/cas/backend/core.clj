@@ -2,21 +2,17 @@
   (:require
    [ring.adapter.jetty :as jetty]
    [cas.backend.routes]
-   #_[org.httpkit.server :as h]))
+   [cas.backend.config :refer [config]]
+   [cas.backend.nrepl]))
 
-(def index-html (slurp "resources/public/index.html"))
 (defonce server (atom nil))
 
-#_(defn handler [req]
-  {:status  200
-   :body index-html})
-
-#_(defn start! []
-  (h/run-server handle {:port 3001}))
-
 (defn start! []
-  (reset! server (jetty/run-jetty cas.backend.routes/handler {:port 3001
-                                      :join? false})))
+  (reset! server
+          (jetty/run-jetty
+           cas.backend.routes/handler
+           {:port (:port config)
+            :join? false})))
 
 (defn stop! []
   (when @server
@@ -31,3 +27,6 @@
   (start!)
   (stop!)
   (reboot!))
+
+(defn -main [& args]
+  (start!))
