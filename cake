@@ -1,12 +1,15 @@
 #!/usr/local/bin/bb
 (require '[babashka.process :refer [sh shell]])
 
-(def *IMAGE-NAME* "cas-app:v1")
 (def *CONTAINER-NAME* "cas-app")
+(def *IMAGE-NAME* "cas-app")
+(def *TAG* "latest")
+(def *TAGGED-IMAGE* (str *IMAGE-NAME* ":" *TAG*))
+(def *REGISTRY* "registry.digitalocean.com/daniel-reg")
+(def *QUALIFIED-IMAGE* (str *REGISTRY* "/" *TAGGED-IMAGE*))
 
 (defn docker-build []
-  (shell "docker"  "build" "-t" *IMAGE-NAME* ".")
-)
+  (shell "docker"  "build" "-t" *IMAGE-NAME* "."))
 
 (defn shadow-release []
   (shell "shadow-cljs release :app"))
@@ -14,6 +17,10 @@
 (defn build []
   (shadow-release)
   (docker-build))
+
+(defn do-push []
+  (shell "docker tag" *TAGGED-IMAGE* *QUALIFIED-IMAGE*)
+  (shell "docker push" *QUALIFIED-IMAGE*))
 
 (defn docker-run []
   (shell "docker create --rm"
@@ -39,6 +46,7 @@
 (def commands
   {"build" build
    "docker-build" docker-build
+   "do-push" do-push
    "debug" docker-debug
    "run" docker-run
    "shadow-release" shadow-release})

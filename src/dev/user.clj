@@ -13,3 +13,5 @@
   (shadow/nrepl-select :app))
 
 
+(defn compile-once [& args] ;for use in deployment: `  clj -X:dev user/compile-once  `
+  (shadow/compile :app))
