@@ -14,15 +14,24 @@
 (defn shadow-compile []
   (shell "shadow-cljs release :app"))
 
-(defn shadow-deploy []
+(defn ghetto-deploy []
+  (let [file-loc "resources/public/js/compiled/main.js"]
+    (shell "scp" file-loc (str "cas-app:/root/cas/" file-loc))))
+
+(defn shadow-full-deploy []
   (shadow-compile)
-  (shell "scp resources/public/compiled/main.js cas-app:/root/cas/resources/public/compiled/main.js"))
+  (ghetto-deploy))
+
+
+(defn ssh []
+  (shell "ssh cas-app"))
+
 
 (defn set-update []
   (shell "scp update.sh cas-app:/root/cas/update.sh"))
 
 (defn build []
-  (shadow-release)
+  (shadow-compile)
   (docker-build))
 
 (defn open-public []
@@ -63,7 +72,9 @@
    "open-public" open-public
    "run" docker-run
    "shadow-compile" shadow-compile
-   "shadow-deploy" shadow-deploy
+   "ghetto-deploy" ghetto-deploy
+   "shadow-full-deploy" shadow-full-deploy
+   "ssh" ssh
    "set-update" set-update
    })
 
