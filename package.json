@@ -7,7 +7,7 @@
     "create-react-class": "^15.7.0",
     "react": "17.0.0",
     "react-dom": "17.0.0",
-    "react-draggable": "^4.2.0"
+    "react-draggable": "^4.2.0",
     "shadow-cljs": "^2.22.10"
   },
   "devDependencies": {
