@@ -15,13 +15,7 @@
   (shell "shadow-cljs release :app"))
 
 (defn set-update []
-  echo
-  "cd /root/cas
-   git pull
-   npm install
-   clj -X:dev user/compile-once
-   clj -M:prod" > /tmp/update.sh
-  scp /tmp/update.sh cas-app:/root/update.sh)
+  (shell "scp /tmp/update.sh cas-app:/root/update.sh"))
 
 (defn build []
   (shadow-release)
