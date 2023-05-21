@@ -12,7 +12,12 @@
   (shell "docker"  "build" "-t" *IMAGE-NAME* "."))
 
 (defn shadow-release []
-  (shell "shadow-cljs release :app"))
+  (shell "shadow-cljs release :app")
+)
+
+(defn shadow-deploy []
+  (shadow-release)
+  (shell "scp resources/public/compiled/main.js cas-app:/root/cas/resources/public/compiled/main.js"))
 
 (defn set-update []
   (shell "scp update.sh cas-app:/root/cas/update.sh"))
