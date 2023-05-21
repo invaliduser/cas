@@ -1,4 +1,6 @@
 
+tinyurl.com/cas-cockpit
+
 * concepts
 ** manipulang is the intermediate representation---basically a lisp, with vectors.  terms in operations often represented as binary might need wrapper terms [:sum [:plus "x"]]
 ** fake/real-paths

@@ -22,7 +22,8 @@
   (docker-build))
 
 (defn open-public []
-  (shell"firefox http://143.198.121.188:8080/cockpit")
+  (shell"firefox tinyurl.com/cas-cockpit")
+  #_(shell"firefox http://143.198.121.188:8080/cockpit")
   )
 
 (defn do-push []
