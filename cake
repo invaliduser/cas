@@ -14,6 +14,15 @@
 (defn shadow-release []
   (shell "shadow-cljs release :app"))
 
+(defn set-update []
+  echo
+  "cd /root/cas
+   git pull
+   npm install
+   clj -X:dev user/compile-once
+   clj -M:prod" > /tmp/update.sh
+  scp /tmp/update.sh cas-app:/root/update.sh)
+
 (defn build []
   (shadow-release)
   (docker-build))
@@ -49,6 +58,8 @@
    "do-push" do-push
    "debug" docker-debug
    "run" docker-run
-   "shadow-release" shadow-release})
+   "shadow-release" shadow-release
+   "set-update" set-update
+   })
 
 ((get commands (first *command-line-args*) default))
