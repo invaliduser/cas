@@ -1,5 +1,5 @@
 cd /root/cas 
 git pull 
 npm install 
-clj -X:dev user/compile-once 
+shadow-cljs release :app
 clj -M:prod

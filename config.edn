@@ -1,4 +1,5 @@
 {:port #profile {:dev 3001
                  :prod 8080}
  :socket #profile {:dev false
-                   :prod true}}
+                   :prod {:port 50505
+                          :bind "0.0.0.0"}} }

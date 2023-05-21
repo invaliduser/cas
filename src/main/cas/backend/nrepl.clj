@@ -4,7 +4,7 @@
             [cider.nrepl :refer [cider-nrepl-handler]]))
 
 
-(defonce server (if (config :socket)
-                  (start-server :port 50505
-                                :bind "0.0.0.0"
+(defonce server (if-let [socket (config :socket)]
+                  (start-server :port (socket :port )
+                                :bind (socket :bind)
                                 :handler cider-nrepl-handler)))

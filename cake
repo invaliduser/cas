@@ -15,11 +15,15 @@
   (shell "shadow-cljs release :app"))
 
 (defn set-update []
-  (shell "scp /tmp/update.sh cas-app:/root/update.sh"))
+  (shell "scp update.sh cas-app:/root/cas/update.sh"))
 
 (defn build []
   (shadow-release)
   (docker-build))
+
+(defn open-public []
+  (shell"firefox http://143.198.121.188:8080/cockpit")
+  )
 
 (defn do-push []
   (shell "docker tag" *TAGGED-IMAGE* *QUALIFIED-IMAGE*)
@@ -51,6 +55,7 @@
    "docker-build" docker-build
    "do-push" do-push
    "debug" docker-debug
+   "open-public" open-public
    "run" docker-run
    "shadow-release" shadow-release
    "set-update" set-update
