@@ -11,12 +11,11 @@
 (defn docker-build []
   (shell "docker"  "build" "-t" *IMAGE-NAME* "."))
 
-(defn shadow-release []
-  (shell "shadow-cljs release :app")
-)
+(defn shadow-compile []
+  (shell "shadow-cljs release :app"))
 
 (defn shadow-deploy []
-  (shadow-release)
+  (shadow-compile)
   (shell "scp resources/public/compiled/main.js cas-app:/root/cas/resources/public/compiled/main.js"))
 
 (defn set-update []
@@ -63,7 +62,8 @@
    "debug" docker-debug
    "open-public" open-public
    "run" docker-run
-   "shadow-release" shadow-release
+   "shadow-compile" shadow-compile
+   "shadow-deploy" shadow-deploy
    "set-update" set-update
    })
 
