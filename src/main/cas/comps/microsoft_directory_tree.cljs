@@ -2,7 +2,7 @@
   (:require [rum.core :as rum]
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
-            [cas.state :refer [tree-atom highlight-atom show-paths? all-real-path curr-value parent-path]]
+            [cas.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path]]
             [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice]]
 
             [cas.chans :refer [key-chan action-interpreter]]

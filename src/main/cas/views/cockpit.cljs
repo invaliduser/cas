@@ -2,7 +2,8 @@
   (:require [rum.core :as rum]
             [cas.comps.equation]
             [cas.state :refer [tree-atom]]
-            [cas.comps.problem-drawer :as pd]))
+            [cas.comps.problem-drawer :as pd]
+            [cas.comps.top-bar :as top-bar]))
 
 ;note: snappiness, quick responsiveness, and few-steps-to-destination covereth a multitude of design sins
 
@@ -17,9 +18,9 @@
   (rum/bind-context [*context* 65]
                     (consumer)))
 
-
 (rum/defc cockpit-page []
   [:div.container
+   #_(top-bar/TopBar)
    [:div
     (cas.comps.equation/mathml-eqn tree-atom )]
    [:div "right drawer---set of problems"

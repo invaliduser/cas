@@ -6,13 +6,23 @@
             [cas.test-data]
             [cas.tree-ops :refer [vget-in remove-last]]
             [rum.core :as rum]))
-
 (defonce db (ds/create-conn))
+(defn all-of [eid] (ds/pull @db '[*] eid))
+
+(defn cursor-in
+  ([ref path]
+   (rum/cursor-in ref path))
+  ([ref path va]
+   (let [res (cursor-in ref path)]
+     (reset! res va)
+     res)))
+
+
 (deftype Crystal [q db]
   IDeref
   (-deref [this]
     (ds/q q @db)))
-
+(def diag (atom nil))
 (defn crystal [q] (Crystal. q db))
 (deftype DBCursor [id attr db] ;basically takes place of atom but we have datascript powers
   IAtom
@@ -36,7 +46,9 @@
   (-notify-watches [this old new])
   (-add-watch [this key f]
     (ds/listen! db key (fn [{:keys [tx-data db-before db-after] :as tx-report}]
-                         (when (some #(= [id attr] (subvec % 0 2)) tx-data)
+                         (if (= @diag nil)
+                           (reset! diag tx-report))
+                         (when (some #(= (list id attr) (take 2 %)) tx-data)
                            (f key this
                               (attr (ds/entity db-before id))
                               (attr (ds/entity db-after id)))))))
@@ -83,6 +95,9 @@
                              (reset! r-atom (f n))))
            r-atom))))
 
+;--------------------------------------------end infra
+
+
 
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
@@ -95,12 +110,15 @@
                             0)
                      :limit limit})))
 
-(defonce mode (atom :edit)) ;:edit and :tree for now
 
-(defonce all-real-path (atom true))
+(defonce settings (db-cursor 1 :value {}))
+(defonce mode (cursor-in settings [:mode] :edit))  ;:edit and :tree for now
+(defonce show-paths? (cursor-in settings [:show-paths?] false))
 
-(defonce tree-atom (atom cas.test-data/default-data))
-(defonce highlight-atom (atom [0]))
+(defonce tree-atom (db-cursor 1 :current-tree cas.test-data/default-data))
+(defonce highlight-atom (db-cursor 1 :highlight-path [0]))
+
+
 (defonce parent-value (over #(get-in % (drop-last %2)) [tree-atom highlight-atom]))
 (defonce curr-value (over vget-in [tree-atom highlight-atom]))
 (defonce parent-path (over remove-last [highlight-atom]))
@@ -110,21 +128,31 @@
 
 (defonce write-buffer (atom nil))
 
-
-(defonce show-paths? (atom false))
-
 (defonce highlight-atom-2 (atom nil))
 
 (def keystream (atom '[]))
+(defonce keylang-input (atom ""))
 (def keystream-tokenized (atom []))
-(def keystream-resolved-tokens)
+#_(add-watch keylang-input :tokenize (fn [k r o n] (reset! keystream-tokenized (tokenize n))))
+#_(defonce keystream-tokenized (over nat/tokenize keylang-input))
 
+(def keystream-resolved-tokens)
 (def keystream-results (atom '[]))
 (def keystream-undecided (atom '[]))
 
-(def keylang-input (atom ""))
+
+(def tokenize-material (db-cursor 1 :kl-i))
+(def tokenized (over nat/tokenize tokenize-material ))
+(def parsed (over nat/iparse tokenized))
+(def compiled-to-tex (over compile-to-tex parsed))
+(def atom-map {"tokenize-material"  tokenize-material
+               "tokenized" tokenized
+               "parsed" parsed
+               "compiled-to-tex" compiled-to-tex})
+
+
 (def last-key (over last keylang-input))
-#_(add-watch keylang-input :tokenize (fn [k r o n] (reset! keystream-tokenized (tokenize n))))
+
 
 
 (defn fall-back-to-memo [f]
@@ -134,8 +162,6 @@
       (let [res (try (reset! holder (apply f args))
                      (catch js/Error e @holder))]
         res))))
-
-
 
 
 (def roadmap (map #(-> % (assoc :k (key-gen))
@@ -158,10 +184,19 @@
                      (:name v)])
                  [{} nil] rm)))
 
-(defonce atom-map (connect-roadmap! roadmap))
+#_(defonce atom-map (connect-roadmap! roadmap))
+
+
+#_(defmacro atom-> )
+#_(def atom-map {"tokenize-material" 
+               "tokenized" 
+               "parsed"
+               "compiled-to-tex"})
 
 (comment (def safe-div (fall-back-to-memo /))
          (safe-div 3 5)
          (safe-div 4 0))
 
 (def problems (atom cas.test-data/test-problems))
+
+(def selected-problem (atom 0)) ; this really does need to move to datascript

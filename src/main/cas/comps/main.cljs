@@ -5,14 +5,12 @@
             [cas.tex-render]
             [cas.comps.basics :as basics]
             [cas.comps.board :as board]
-            [cas.views.bench :as bench]
             [cas.views.tree-manip :as tree-manip]
             [cas.state :as state]
             [cas.shorthand :as sh]))
 
 (def views [{:component tree-manip/tree-manip-harness :name "tree manipulation harness"}
-            {:component board/backdrop :name "backdrop"}
-            {:component bench/bench-comp :name "bench"}])
+            {:component board/backdrop :name "backdrop"}])
 
 (rum/defc main-comp < rum/reactive []
   [:div {:height "100%"}
