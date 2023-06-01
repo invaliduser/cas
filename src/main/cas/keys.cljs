@@ -65,6 +65,8 @@
    
    #{:ctrl "z"} :undo})
 
+#{:alt "ArrowUp"} :problem-up
+   #{:alt "ArrowDown"} :problem-down
 
 
 (defn send-to-key-chan-listener [handler]
@@ -153,7 +155,7 @@
 
 (defn write-mode-listener [handler]
   (fn [ev]
-    (let [k (.-key ev)]
+    (let [k   (.-key ev)]
       (if (or (text-edit!-keys k)
               (tokenizeable-keys k))
         (do        (case k
@@ -164,8 +166,6 @@
                    (println (full @keylang-input))
                    (reset! @cas.state/write-buffer (full @keylang-input))))
       (handler ev))))
-
-
 
 (defn great-white-key-listener [ev]
   (let [pipeline (cond-> identity       
