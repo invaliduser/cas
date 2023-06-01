@@ -5,7 +5,7 @@
             [cas.comps.microsoft-directory-tree :as easy-tree]
             [cas.tex-render :refer [render-tex]]
             [cas.lang-to.tex :refer [compile-to-tex]]
-            [cas.state :refer [mode tree-atom tex roadmap atom-map] :as state]
+            [cas.state :refer [mode tree-atom tex atom-map] :as state]
             [cas.keys :refer [key-stream-display]]
             [cas.comps.basics :as basics]
             [react]))
@@ -13,15 +13,15 @@
 (rum/defc mode-indicator < rum/reactive []
   [:span (str (rum/react mode) "-mode")])
 
-(rum/defc render-roadmap < rum/reactive [rm]
-  [:div (for [{ename :name :as entry} rm]
-          [:div {:key (:k entry)}
-           [:div [:label ename]]
-           [:div (str (rum/react (atom-map ename)))]])])
+(rum/defc render-roadmap < rum/reactive []
+  [:div (for [k (keys atom-map)]
+          [:div {:key (str k)}
+           [:div [:label (str k)]]
+           [:div (str (rum/react (atom-map k)))]])])
 
 
 (defn shove-pipe [s]
-  (reset! (atom-map "tokenize-material") s))
+  (reset! (atom-map :untokenized) s))
 
 (def tholder (atom ""))
 
@@ -35,14 +35,14 @@
 
     [:div [:code (str (rum/react tholder))]]]
    
-   (render-roadmap roadmap)
-   (basics/full-tex-display (atom-map "compiled-to-tex"))
+   (render-roadmap)
+   (basics/full-tex-display (atom-map :raw-tex))
 
 
    (key-stream-display)
    [:div [:input {:type "button"
                   :on-click #(do
-                               (reset! tree-atom [@(state/atom-map "parsed")])
+                               (reset! tree-atom [@(state/atom-map :parsed)])
                                (state/advance!)
                                (state/advance!))
                   :value "move to tree"}]]])

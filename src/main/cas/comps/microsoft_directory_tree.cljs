@@ -122,6 +122,7 @@
 
         (vector? @cas.state/curr-value)
         (swap! highlight-atom conj 1)
+
         (= 0 (last @highlight-atom))
         (swap! highlight-atom vassoc -1 1)
         :else nil)

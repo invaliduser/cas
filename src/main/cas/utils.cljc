@@ -1,9 +1,4 @@
-(ns cas.utils
-  (:require [cas.shorthand]))
-
-(def alert js/alert)
-(declare evaluate compile parse simplify)
-
+(ns cas.utils)
 
 (def letters #{\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z})
 

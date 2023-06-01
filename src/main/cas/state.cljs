@@ -1,11 +1,14 @@
 (ns cas.state
   (:require [cas.lang-to.tex :refer [compile-to-tex]]
+            [cas.data :as data :refer [over]]
             [cas.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]
             [cas.test-data]
             [cas.tree-ops :refer [vget-in remove-last]]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [cas.data :refer [over atom->]]))
+
 (defonce db (ds/create-conn))
 (defn all-of [eid] (ds/pull @db '[*] eid))
 
@@ -22,7 +25,7 @@
   IDeref
   (-deref [this]
     (ds/q q @db)))
-(def diag (atom nil))
+
 (defn crystal [q] (Crystal. q db))
 (deftype DBCursor [id attr db] ;basically takes place of atom but we have datascript powers
   IAtom
@@ -46,8 +49,6 @@
   (-notify-watches [this old new])
   (-add-watch [this key f]
     (ds/listen! db key (fn [{:keys [tx-data db-before db-after] :as tx-report}]
-                         (if (= @diag nil)
-                           (reset! diag tx-report))
                          (when (some #(= (list id attr) (take 2 %)) tx-data)
                            (f key this
                               (attr (ds/entity db-before id))
@@ -77,23 +78,6 @@
                  :where [25 :fname ?name]] @db)
          (:fname (ds/entity @db 25)))
 
-(defn over
-  ([f as]
-   (over f as (key-gen)))
-  ([f as k]
-   (cond (vector? as)
-         (let [arg-cache (atom  (vec (map deref as)))
-               r-atom (atom (apply f @arg-cache))]
-           (add-watch arg-cache k (fn [k r o n] (reset! r-atom (apply f n))))
-           (doseq [i (range (count as))]
-             (add-watch (nth as i) (key-gen) (fn [k r o n]
-                                               (swap! arg-cache assoc i n))))
-           r-atom)
-         :else
-         (let [r-atom (atom (f @as))]
-           (add-watch as k (fn [k r o n]
-                             (reset! r-atom (f n))))
-           r-atom))))
 
 ;--------------------------------------------end infra
 
@@ -102,7 +86,7 @@
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
 
-(def toogleoo (switch-atom 2))
+(def toogleoo (switch-atom 1))
 (defn advance! [] ;index vector
   (swap! toogleoo (fn [{:keys [idx limit]}]
                     {:idx (if (< idx limit)
@@ -111,50 +95,46 @@
                      :limit limit})))
 
 
+;;;;
 (defonce settings (db-cursor 1 :value {}))
 (defonce mode (cursor-in settings [:mode] :edit))  ;:edit and :tree for now
 (defonce show-paths? (cursor-in settings [:show-paths?] false))
 
+;;;;
 (defonce tree-atom (db-cursor 1 :current-tree cas.test-data/default-data))
 (defonce highlight-atom (db-cursor 1 :highlight-path [0]))
-
 
 (defonce parent-value (over #(get-in % (drop-last %2)) [tree-atom highlight-atom]))
 (defonce curr-value (over vget-in [tree-atom highlight-atom]))
 (defonce parent-path (over remove-last [highlight-atom]))
-
 (def tex (over #(compile-to-tex (first %)) tree-atom ))
 
 
-(defonce write-buffer (atom nil))
-
-(defonce highlight-atom-2 (atom nil))
-
-(def keystream (atom '[]))
-(defonce keylang-input (atom ""))
-(def keystream-tokenized (atom []))
-#_(add-watch keylang-input :tokenize (fn [k r o n] (reset! keystream-tokenized (tokenize n))))
-#_(defonce keystream-tokenized (over nat/tokenize keylang-input))
+;;;;
+(def keystream (db-cursor 1 :keystream '[])#_(atom '[]))
 
 (def keystream-resolved-tokens)
 (def keystream-results (atom '[]))
 (def keystream-undecided (atom '[]))
 
+;;;;
+(defonce keylang-input (atom ""))
+(defonce write-buffer (atom nil))
 
-(def tokenize-material (db-cursor 1 :kl-i))
-(def tokenized (over nat/tokenize tokenize-material ))
-(def parsed (over nat/iparse tokenized))
-(def compiled-to-tex (over compile-to-tex parsed))
-(def atom-map {"tokenize-material"  tokenize-material
-               "tokenized" tokenized
-               "parsed" parsed
-               "compiled-to-tex" compiled-to-tex})
+(defonce untokenized keylang-input)
+(atom-> untokenized
+        tokenized nat/tokenize
+        parsed nat/iparse
+        raw-tex compile-to-tex)
 
+(defonce atom-map {:untokenized untokenized
+               :tokenized tokenized
+               :parsed parsed
+               :raw-tex raw-tex})
 
-(def last-key (over last keylang-input))
+(defonce last-key (over last keylang-input))
 
-
-
+;;;;
 (defn fall-back-to-memo [f]
   (let [holder (atom "")]
     (fn [& args]
@@ -162,36 +142,6 @@
       (let [res (try (reset! holder (apply f args))
                      (catch js/Error e @holder))]
         res))))
-
-
-(def roadmap (map #(-> % (assoc :k (key-gen))
-                       (update :f fall-back-to-memo))
-                  [{:name "tokenize-material"}
-
-                   {:name "tokenized"
-                    :f nat/tokenize}
-
-                   {:name "parsed"
-                    :f nat/iparse}
-
-                   {:name "compiled-to-tex"
-                    :f compile-to-tex}]))
-
-(defn connect-roadmap! [rm]
-  (first (reduce (fn [[m last-key] v]
-                   [(assoc m (:name v) (if last-key (over (:f v) (m last-key))
-                                           (atom nil)))
-                     (:name v)])
-                 [{} nil] rm)))
-
-#_(defonce atom-map (connect-roadmap! roadmap))
-
-
-#_(defmacro atom-> )
-#_(def atom-map {"tokenize-material" 
-               "tokenized" 
-               "parsed"
-               "compiled-to-tex"})
 
 (comment (def safe-div (fall-back-to-memo /))
          (safe-div 3 5)

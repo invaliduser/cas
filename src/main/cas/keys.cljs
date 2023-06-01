@@ -88,7 +88,7 @@
 (rum/defc key-stream-display < rum/reactive []
   [:div {:style {:text-align "center" :font-size 24} :on-click #(do
                                                                   (println "reset keystream")
-                                                                  (reset! keystream '()))}
+                                                                  (reset! keystream []))}
    [:span "resolved here"]
    [:br]
    [:span {:style { }} (apply str (interpose " " (rum/react keystream)))]
@@ -101,15 +101,10 @@
 
 
 ;key handlers are like middleware, taking another handler
-#_(def key-handlers [#(tokenizeable-key-handler % (cas.state/atom-map "tokenize-material"))
-                   identity               ; bench
-                   tree-manip-key-handler ;tree-manip
-
-                   ])
 
 (defn debug-key-listener [handler]
   (fn [ev]
-    (reset! last-key ev)
+    #_(reset! last-key ev)
     (println "pressed " (serialize-key-event ev) " in " @mode " mode")
     (js/console.log ev)
     (handler ev)))
@@ -136,19 +131,12 @@
         (swap! keystream conj k))
       (handler ev))))
 
-
-
 (defn default-preventer [handler]
   (fn [ev]
     (if-not (or (ctrl+ "r" ev)
                 (#{"F12" "Tab" " " "Shift"} (.-key ev)))
       (.preventDefault ev))
     (handler ev)))
-
-
-
-
-
 
 (defn tokenizeable-key-handler [handler atm] ; need to write a cursor for this
   (fn [ev]

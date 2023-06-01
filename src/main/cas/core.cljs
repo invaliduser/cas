@@ -1,6 +1,5 @@
 (ns cas.core
-  (:require [cas.utils :refer [alert]]
-            [rum.core :as rum]
+  (:require [rum.core :as rum]
             [cas.comps.main]
             [cas.keys :refer [refresh-listeners]]
             [cas.routing]))
