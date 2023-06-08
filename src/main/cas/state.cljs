@@ -69,7 +69,7 @@
           }
          (ds/transact! db [[:db/add 25 :fname "daniel"]
                            [:db/add 25 :lname "bell"]])
-         ;or
+                                        ;or
          (ds/transact! db [{:db/id 25
                             :fname "daniel"
                             :lname "bell"}])
@@ -78,10 +78,45 @@
                  :where [25 :fname ?name]] @db)
          (:fname (ds/entity @db 25)))
 
-
 ;--------------------------------------------end infra
 
+(deftype ArbitraryCursor ;no cache
+    [read write]
+    IAtom
+    IDeref
+    (-deref [this]
+      (read))
 
+    IReset
+    (-reset! [this new-value]
+      (write new-value))
+
+    ISwap
+    (-swap! [a f] (-reset! a (f (-deref a))))
+    (-swap! [a f x] (-reset! a (f (-deref a) x)))
+    (-swap! [a f x y] (-reset! a (f (-deref a) x y)))
+    (-swap! [a f x y more] (-reset! a (apply f (-deref a) x y more)))
+
+    IWatchable
+    (-add-watch [this key f]
+      (set! (.-watches this) (assoc (.-watches this) key f)))
+    (-notify-watches [this old new]
+      #_(set! (.-last_val this) new)
+      (println "notifying watches...")
+      (doseq [[k v] (.-watches this)]
+        (v k this old new)))
+    (-remove-watch [this key]
+      (set! (.-watches this) (dissoc (.-watches this) key))))
+
+(defn arb-cursor
+  ([read write set-listen!]
+   (let [a (ArbitraryCursor. read write)]
+     (set-listen! a)
+     a))
+  ([read write set-listen! initial-value]
+   (let [a (arb-cursor read write set-listen!)]
+     (reset! a initial-value)
+     a)))
 
 (defn switch-atom [limit]
   (atom {:idx 0 :limit limit}))
@@ -94,18 +129,52 @@
                             0)
                      :limit limit})))
 
-
 ;;;;
 (defonce settings (db-cursor 1 :value {}))
 (defonce mode (cursor-in settings [:mode] :edit))  ;:edit and :tree for now
 (defonce show-paths? (cursor-in settings [:show-paths?] false))
 
 ;;;;
-(defonce tree-atom (db-cursor 1 :current-tree cas.test-data/default-data))
-(defonce highlight-atom (db-cursor 1 :highlight-path [0]))
+(def default-highlight [0])
+(def problems (db-cursor 1 :problems cas.test-data/test-problems))
+(def highlights  (db-cursor 1 :highlights (vec (repeat (count cas.test-data/test-problems) default-highlight))))
+(def selected-problem  (db-cursor 1 :selected-problem 0))
 
-(defonce parent-value (over #(get-in % (drop-last %2)) [tree-atom highlight-atom]))
-(defonce curr-value (over vget-in [tree-atom highlight-atom]))
+(defn cache-and-notify [target-atom]
+  (let [new @target-atom
+        old (.-last_val ^js target-atom)]
+    (set! (.-last_val ^js target-atom) new)
+    (if (not= old new)
+      (-notify-watches target-atom old new))))
+
+(defn atoms-listener [as]
+  (fn [target-atom]
+    (doseq [atm as]
+      (add-watch atm (key-gen)
+                 (fn [k r o n]
+                   (cache-and-notify target-atom))))))
+
+(defonce tree-atom (let [read (fn [] ( @problems @selected-problem))
+                         write  (fn [nv] (swap! problems assoc-in [@selected-problem :tree] nv))
+                         set-listen (atoms-listener [problems selected-problem])]
+                     (arb-cursor read write set-listen)))
+
+(defonce highlight-atom (let [read (fn [] (@highlights @selected-problem))
+                                write (fn [nv] (swap! highlights assoc @selected-problem nv))
+                                set-listen (atoms-listener [highlights selected-problem])]
+                          (arb-cursor read write set-listen)))
+
+#_(defonce highlight-atom (db-cursor 1 :highlight-path default-highlight))
+
+(defonce parent-value (over (fn [tree highlight] (get-in tree (drop-last highlight)))
+                            [tree-atom highlight-atom]))
+(def db-hold (atom nil))
+(defonce curr-value  (let [read (fn [] (vget-in @tree-atom @highlight-atom))
+                           write  (fn [nv] (swap! tree-atom assoc-in highlight-atom nv))
+                           set-listen (atoms-listener [tree-atom highlight-atom])]
+                       (arb-cursor read write set-listen)))
+
+#_(defonce curr-value (over vget-in [tree-atom highlight-atom]))
 (defonce parent-path (over remove-last [highlight-atom]))
 (def tex (over #(compile-to-tex (first %)) tree-atom ))
 
@@ -147,6 +216,6 @@
          (safe-div 3 5)
          (safe-div 4 0))
 
-(def problems (atom cas.test-data/test-problems))
 
-(def selected-problem (atom 0)) ; this really does need to move to datascript
+
+ ; this really does need to move to datascript

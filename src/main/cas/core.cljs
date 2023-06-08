@@ -2,7 +2,8 @@
   (:require [rum.core :as rum]
             [cas.comps.main]
             [cas.keys :refer [refresh-listeners]]
-            [cas.routing]))
+            [cas.routing]
+            [cas.actions]))
 
 
 (set! *warn-on-infer* true)
@@ -21,6 +22,7 @@
 
 (defn init! []
   (cas.routing/start!)
+  (cas.actions/init-actions!)
   (rum/mount
    #_(cas.comps.main/main-comp)
    (cas.routing/routing-component)

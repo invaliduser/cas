@@ -20,4 +20,14 @@
     [:> mui/List 
      (map-indexed Problem #_Problem (rum/react cas.state/problems))]]])
 
-  
+(defn problem-up! []
+  (swap! cas.state/selected-problem
+         #(if (<= % 0)
+            %
+            (dec %))))
+
+(defn problem-down! []
+  (swap! cas.state/selected-problem
+         #(if (>= % (dec (count @cas.state/problems )))
+            %
+            (inc %))))

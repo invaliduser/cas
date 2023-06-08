@@ -74,6 +74,7 @@
 
 (defn vget
   ([v idx]
+   (assert (vector? v))
    (cond (int? idx)
          (v (neg-idx v idx))
          (vector? idx)
@@ -86,6 +87,9 @@
 
 (defn vget-in
   ([m path]
+   (println "m:" m)
+   (println "path:" path)
+   (println "result:"(reduce vget m path))
    (reduce vget m path))
   ([m path not-found]
    (throw "you should probably implement not-found for vget-in")))

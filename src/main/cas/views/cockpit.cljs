@@ -18,10 +18,11 @@
   (rum/bind-context [*context* 65]
                     (consumer)))
 
-(rum/defc cockpit-page []
+(rum/defc cockpit-page < rum/reactive []
   [:div.container
    #_(top-bar/TopBar)
    [:div
+    [:span (str (rum/react tree-atom))]
     (cas.comps.equation/mathml-eqn tree-atom )]
    [:div "right drawer---set of problems"
     (pd/Problem-Drawer)]])

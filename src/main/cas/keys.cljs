@@ -63,11 +63,9 @@
    #{:ctrl "v"} :paste
    #{:ctrl "x"} :cut
    
-   #{:ctrl "z"} :undo})
-
-#{:alt "ArrowUp"} :problem-up
-   #{:alt "ArrowDown"} :problem-down
-
+   #{:ctrl "z"} :undo
+   #{:alt "ArrowUp"} :problem-up
+   #{:alt "ArrowDown"} :problem-down})
 
 (defn send-to-key-chan-listener [handler]
   (fn [ev]

@@ -5,7 +5,7 @@
             [cas.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path]]
             [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice]]
 
-            [cas.chans :refer [key-chan action-interpreter]]
+
             [cas.shorthand :as sh]))
 
 (defn matches-real-path? [np hp] ;[node-path highlight-path]; both are real-path
@@ -139,6 +139,7 @@
   (swap! highlight-atom cas.tree-ops/right @tree-atom))
 
 (defn select-operator! []
+  (assert (not= @tree-atom "x"))
   (cond (vector? (vget-in @tree-atom @highlight-atom))
         (swap! highlight-atom conj 0)))
 
@@ -215,19 +216,7 @@
          (fn [prev-value]
            (prev-value (last @highlight-atom)))))
 
-(action-interpreter "tree-manip" {:left left!
-                                  :right right!
-                                  :down down!
-                                  :up up!
-                                  :select-operator select-operator!
-                                  :toggle-parens toggle-parens!
-                                  :select-top select-top!
-                                  :delete delete!
-                                  :extend-left extend-left!
-                                  :extend-right extend-right!
-                                  }
-                    key-chan
-                    :after #(println (str "got " % ", path is now " @highlight-atom)))
+
 
 
 {"list of paredit commands"
