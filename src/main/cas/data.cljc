@@ -3,6 +3,9 @@
   #?(:cljs (:require-macros [cas.data :refer [atom->]]))
   )
 
+(defprotocol INotifiable
+  (-notify [this v]))
+
 (defn over
   ([f as]
    (over f as (key-gen)))

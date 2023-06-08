@@ -1,13 +1,13 @@
 (ns cas.state
   (:require [cas.lang-to.tex :refer [compile-to-tex]]
-            [cas.data :as data :refer [over]]
+            [cas.data :refer [over atom-> -notify INotifiable]]
             [cas.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]
             [cas.test-data]
             [cas.tree-ops :refer [vget-in remove-last]]
             [rum.core :as rum]
-            [cas.data :refer [over atom->]]))
+))
 
 (defonce db (ds/create-conn))
 (defn all-of [eid] (ds/pull @db '[*] eid))
