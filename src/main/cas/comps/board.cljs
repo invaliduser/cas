@@ -3,10 +3,10 @@
             [cljs.spec.alpha :as spec]
             [clojure.walk :as walk]
             [cas.comps.microsoft-directory-tree :as easy-tree]
-            [cas.tex-render :refer [render-tex]]
+            [cas.frontend.tex-render :refer [render-tex]]
             [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.frontend.state :refer [mode tree-atom tex atom-map] :as state]
-            [cas.keys :refer [key-stream-display]]
+            [cas.frontend.keys :refer [key-stream-display]]
             [cas.comps.basics :as basics]
             [react]))
 

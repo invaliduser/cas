@@ -1,10 +1,10 @@
-(ns cas.keys
+(ns cas.frontend.keys
   (:require [goog.events :as events]
             [rum.core :as rum]
             [cljs.core.async :refer [chan <! >! go]]
             [cas.frontend.chans :refer [key-chan]]
             [cas.frontend.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer] :as state]
-            [cas.nat :refer [full]]
+            [cas.frontend.nat :refer [full]]
             [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]
             [cas.shorthand :as sh])
   (:import [goog.events KeyHandler]

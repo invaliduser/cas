@@ -1,7 +1,7 @@
-(ns cas.core
+(ns cas.frontend.core
   (:require [rum.core :as rum]
             [cas.comps.main]
-            [cas.keys :refer [refresh-listeners]]
+            [cas.frontend.keys :refer [refresh-listeners]]
             [cas.frontend.routing :as routing]
             [cas.frontend.actions :as actions]))
 

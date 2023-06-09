@@ -2,7 +2,7 @@
   (:require [rum.core :as rum]
             [cas.lang-to.tex]
             [cljs.tools.reader.edn]
-            [cas.tex-render]
+            [cas.frontend.tex-render]
             [cas.comps.basics :as basics]
             [cas.comps.board :as board]
             [cas.views.tree-manip :as tree-manip]

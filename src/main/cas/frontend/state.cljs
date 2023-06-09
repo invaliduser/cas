@@ -1,11 +1,11 @@
 (ns cas.frontend.state
   (:require [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.data :refer [over atom-> -notify INotifiable -cleanup-watches]]
-            [cas.nat :as nat]
+            [cas.frontend.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]
-            [cas.test-data]
-            [cas.tree-ops :refer [vget-in remove-last]]
+            [cas.frontend.test-data :as test-data]
+            [cas.frontend.tree-ops :refer [vget-in remove-last]]
             [rum.core :as rum]))
 
 (defonce db (ds/create-conn))
@@ -145,8 +145,8 @@
 
 ;;;;
 (def default-highlight [0])
-(def problems (db-cursor 1 :problems cas.test-data/test-problems))
-(def highlights  (db-cursor 1 :highlights (vec (repeat (count cas.test-data/test-problems) default-highlight))))
+(def problems (db-cursor 1 :problems test-data/test-problems))
+(def highlights  (db-cursor 1 :highlights (vec (repeat (count test-data/test-problems) default-highlight))))
 (def selected-problem  (db-cursor 1 :selected-problem 0))
 
 (defonce tree-atom (arb-cursor {:read (fn [] (@problems @selected-problem))

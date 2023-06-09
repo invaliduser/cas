@@ -1,6 +1,6 @@
 (ns cas.comps.basics
   (:require [rum.core :as rum]
-            [cas.tex-render :refer [render-tex]]))
+            [cas.frontend.tex-render :refer [render-tex]]))
 
 
 (rum/defc editable-textarea < rum/reactive [atm]

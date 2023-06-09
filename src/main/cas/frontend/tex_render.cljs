@@ -1,4 +1,4 @@
-(ns cas.tex-render)
+(ns cas.frontend.tex-render)
 
 (defn render-tex [tex]
   (.tex2svg js/MathJax tex))

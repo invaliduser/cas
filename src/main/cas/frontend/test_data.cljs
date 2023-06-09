@@ -1,4 +1,4 @@
-(ns cas.test-data)
+(ns cas.frontend.test-data)
 (def default-data
   [[:=
     [:list

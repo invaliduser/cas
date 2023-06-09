@@ -1,9 +1,9 @@
 (ns cas.comps.microsoft-directory-tree
   (:require [rum.core :as rum]
-            [cas.tex-render :refer [render-tex]]
+            [cas.frontend.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.frontend.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path] :as state]
-            [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice]]
+            [cas.frontend.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice] :as tree-ops]
 
 
             [cas.shorthand :as sh]))
@@ -126,17 +126,17 @@
         (= 0 (last @highlight-atom))
         (swap! highlight-atom vassoc -1 1)
         :else nil)
-  #_(swap! highlight-atom cas.tree-ops/down @tree-atom ))
+  #_(swap! highlight-atom tree-ops/down @tree-atom ))
 
 (defn up! []
   (cond (> (count @highlight-atom) 1)
-        (swap! highlight-atom cas.tree-ops/prim-up @tree-atom)))
+        (swap! highlight-atom tree-ops/prim-up @tree-atom)))
 
 (defn left! []
-  (swap! highlight-atom cas.tree-ops/left @tree-atom))
+  (swap! highlight-atom tree-ops/left @tree-atom))
 
 (defn right! []
-  (swap! highlight-atom cas.tree-ops/right @tree-atom))
+  (swap! highlight-atom tree-ops/right @tree-atom))
 
 (defn select-operator! []
   (cond (vector? (vget-in @tree-atom @highlight-atom))
@@ -149,10 +149,10 @@
   (reset! highlight-atom [0]))
 
 (defn extend-right! []
-  (swap! highlight-atom cas.tree-ops/extend-right @tree-atom))
+  (swap! highlight-atom tree-ops/extend-right @tree-atom))
 
 (defn extend-left! []
-  (swap! highlight-atom cas.tree-ops/extend-left @tree-atom))
+  (swap! highlight-atom tree-ops/extend-left @tree-atom))
 
 (defn delete! []
   (dotota delete-at @highlight-atom))

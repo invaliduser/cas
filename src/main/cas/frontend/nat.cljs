@@ -1,4 +1,4 @@
-(ns cas.nat
+(ns cas.frontend.nat
   #_(:require
    #_[cas.utils :refer [letters]]
    #_[shorthand :as sh]))

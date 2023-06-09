@@ -1,4 +1,4 @@
-(ns cas.tree-ops)
+(ns cas.frontend.tree-ops)
 
 (defn contents [data]
   (if (not (vector? data))

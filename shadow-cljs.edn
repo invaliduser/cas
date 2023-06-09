@@ -10,5 +10,5 @@
  :builds
  {:app {:target :browser
         :output-dir "resources/public/js/compiled/"
-        :modules {:main {:entries [cas.core]
-                         :init-fn cas.core/init!}}}}}
+        :modules {:main {:entries [cas.frontend.core]
+                         :init-fn cas.frontend.core/init!}}}}}
