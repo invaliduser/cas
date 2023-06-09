@@ -2,7 +2,7 @@
   (:require [rum.core :as rum]
             [cas.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
-            [cas.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path]]
+            [cas.frontend.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path] :as state]
             [cas.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice]]
 
 
@@ -120,7 +120,7 @@
   (cond (vector? (last @highlight-atom))
         nil ;we don't go down multiple paths
 
-        (vector? @cas.state/curr-value)
+        (vector? @state/curr-value)
         (swap! highlight-atom conj 1)
 
         (= 0 (last @highlight-atom))
@@ -139,7 +139,6 @@
   (swap! highlight-atom cas.tree-ops/right @tree-atom))
 
 (defn select-operator! []
-  (assert (not= @tree-atom "x"))
   (cond (vector? (vget-in @tree-atom @highlight-atom))
         (swap! highlight-atom conj 0)))
 

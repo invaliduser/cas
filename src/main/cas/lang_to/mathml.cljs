@@ -1,6 +1,6 @@
 (ns cas.lang-to.mathml
   (:require [rum.core :as rum]
-            [cas.state :refer [highlight-atom tree-atom]]
+            [cas.frontend.state :refer [highlight-atom tree-atom] :as state]
             [cas.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant vassoc]]))
 
 (def non-parent-operators

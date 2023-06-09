@@ -7,8 +7,6 @@
             [muuntaja.middleware :as muuntaja]
             [muuntaja.core :as m]))
 
-(defn get-body [req ])
-
 
 (def index-html (slurp "resources/public/index.html"))
 

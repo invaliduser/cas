@@ -2,8 +2,8 @@
   (:require [goog.events :as events]
             [rum.core :as rum]
             [cljs.core.async :refer [chan <! >! go]]
-            [cas.chans :refer [key-chan]]
-            [cas.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer]]
+            [cas.frontend.chans :refer [key-chan]]
+            [cas.frontend.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer] :as state]
             [cas.nat :refer [full]]
             [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]
             [cas.shorthand :as sh])
@@ -118,7 +118,7 @@
             (#{\\ "Enter"} (.-key ev))) ;this should maybe be refactored out to somewhere else
         (let [new-mode (case @mode :write :edit :edit :write)]
           (if (= new-mode :write)
-            (reset! cas.state/write-buffer  (rum.core/cursor-in tree-atom @highlight-atom)))
+            (reset! state/write-buffer  (rum.core/cursor-in tree-atom @highlight-atom)))
           (reset! mode new-mode)
           (reset! keylang-input "")
           (println "setting to " new-mode " mode"))))
@@ -158,11 +158,11 @@
               (tokenizeable-keys k))
         (do        (case k
                      "Backspace"
-                     (swap! cas.state/keylang-input #(.slice % 0 -1))
-                     (swap! cas.state/keylang-input str k))
+                     (swap! state/keylang-input #(.slice % 0 -1))
+                     (swap! state/keylang-input str k))
                    (println @keylang-input)
                    (println (full @keylang-input))
-                   (reset! @cas.state/write-buffer (full @keylang-input))))
+                   (reset! @state/write-buffer (full @keylang-input))))
       (handler ev))))
 
 (defn great-white-key-listener [ev]
@@ -170,7 +170,7 @@
                                         ;time to care
 
                    
-                   #_#_true ((key-handlers (:idx @cas.state/toogleoo)))
+                   #_#_true ((key-handlers (:idx @state/toogleoo)))
                    (= @mode :write) (write-mode-listener)
                    (= @mode :edit) (tree-manip-key-handler)
 

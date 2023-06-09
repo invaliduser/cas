@@ -1,7 +1,7 @@
 (ns cas.views.cockpit
   (:require [rum.core :as rum]
             [cas.comps.equation]
-            [cas.state :refer [tree-atom]]
+            [cas.frontend.state :refer [tree-atom]]
             [cas.comps.problem-drawer :as pd]
             [cas.comps.top-bar :as top-bar]))
 
@@ -22,7 +22,5 @@
   [:div.container
    #_(top-bar/TopBar)
    [:div
-    [:span (str (rum/react tree-atom))]
     (cas.comps.equation/mathml-eqn tree-atom )]
-   [:div "right drawer---set of problems"
-    (pd/Problem-Drawer)]])
+   [:div (pd/Problem-Drawer)]])

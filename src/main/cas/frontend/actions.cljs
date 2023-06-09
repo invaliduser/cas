@@ -1,9 +1,9 @@
-(ns cas.actions
+(ns cas.frontend.actions
   (:require
-   [cas.chans :refer [key-chan action-interpreter]]
+   [cas.frontend.chans :refer [key-chan action-interpreter]]
    [cas.comps.microsoft-directory-tree :as mdt]
    [cas.comps.problem-drawer :as pd]
-   [cas.state :refer [highlight-atom]]))
+   [cas.frontend.state :refer [highlight-atom]]))
 
 (defn init-actions! []
   (action-interpreter "tree-manip" {:left mdt/left!
@@ -19,6 +19,7 @@
 
                                     :problem-up pd/problem-up!
                                     :problem-down pd/problem-down!
+                                    
                                     }
                       key-chan
                       :after #(println (str "got " % ", path is now " @highlight-atom))))

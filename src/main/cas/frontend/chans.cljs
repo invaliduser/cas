@@ -1,4 +1,4 @@
-(ns cas.chans
+(ns cas.frontend.chans
   (:require
    [ajax.core :as ajax]
    [cljs.core.async :refer [chan <! >! go-loop]]))

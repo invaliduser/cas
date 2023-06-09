@@ -1,10 +1,10 @@
 (ns cas.data
   (:require [cas.utils :refer [key-gen]])
-  #?(:cljs (:require-macros [cas.data :refer [atom->]]))
-  )
+  #?(:cljs (:require-macros [cas.data :refer [atom->]])))
 
 (defprotocol INotifiable
-  (-notify [this v]))
+  (-notify [this v])
+  (-cleanup-watches [this]))
 
 (defn over
   ([f as]

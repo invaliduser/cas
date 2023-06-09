@@ -1,4 +1,4 @@
-(ns cas.routing
+(ns cas.frontend.routing
   (:require [reitit.frontend.easy :as rfe]
             [rum.core :as rum]
             [reitit.frontend :as rf]
