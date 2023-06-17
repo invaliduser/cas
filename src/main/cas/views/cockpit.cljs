@@ -3,7 +3,8 @@
             [cas.comps.equation]
             [cas.frontend.state :refer [tree-atom]]
             [cas.comps.problem-drawer :as pd]
-            [cas.comps.top-bar :as top-bar]))
+            [cas.comps.top-bar :as top-bar]
+            [cas.comps.pdf :as pdf]))
 
 ;note: snappiness, quick responsiveness, and few-steps-to-destination covereth a multitude of design sins
 
@@ -22,5 +23,7 @@
   [:div.container
    #_(top-bar/TopBar)
    [:div
-    (cas.comps.equation/mathml-eqn tree-atom )]
+    (cas.comps.equation/mathml-eqn tree-atom)]
+   [:div (pdf/pdf-canvas)]
+   
    [:div (pd/Problem-Drawer)]])

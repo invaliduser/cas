@@ -19,7 +19,8 @@
 
                                     :problem-up pd/problem-up!
                                     :problem-down pd/problem-down!
-                                    
+
+                                    #_:compile-to-pdf
                                     }
                       key-chan
                       :after #(println (str "got " % ", path is now " @highlight-atom))))

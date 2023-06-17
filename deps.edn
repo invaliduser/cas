@@ -5,7 +5,7 @@
         thheller/shadow-cljs {:mvn/version "2.23.3"}
         devcards/devcards {:mvn/version "0.2.7"}
         rum/rum {:mvn/version "0.12.10"}
-        org.clojure/core.async {:mvn/version "0.7.559"}
+        org.clojure/core.async {:mvn/version "1.6.673"}
         automat/automat {:mvn/version "0.2.4"}
         instaparse/instaparse {:mvn/version "1.4.10"}
         datascript/datascript {:mvn/version "1.0.4"}
