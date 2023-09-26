@@ -1,2 +1,2 @@
 ((nil .
-  ((cider-jack-in-cmd . "clj -M:dev"))))
+  ((cider-jack-in-cmd . "clojure -M:dev"))))
