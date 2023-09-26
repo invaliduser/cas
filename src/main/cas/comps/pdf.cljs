@@ -3,16 +3,18 @@
             [cljs.core.async :refer [go]]
             [cljs.core.async.interop :refer-macros [<p!]]))
 
+;;trying two methods of pdf rendering:pdf.js, immediately below, and latex.js, below that
+;;
 
-;the pdf.js version ---there is also a lib latex.js, out there
+;;the pdf.js version ---https://mozilla.github.io/pdf.js/examples/
+
+;possibly relevant: https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 (rum/defc pdf-canvas []
   (let [ref (rum/use-ref nil)]
     (rum/use-effect! #(.log js/console (rum/deref ref)))
     [:div
-     "hi"
+     "hi --- run (render-pdf \"ok.pdf\") to see me"
      [:canvas {:id "canvas" :ref ref} ]]))
-
-
 
 (defn get-pdf-promise [task]
   (.-promise ^js task))
@@ -50,3 +52,11 @@
                                 :transform transform
                                 :viewport viewport}]
         (.render page render-context)))))
+
+;;the latex.js version
+
+; see here https://latex.js.org/usage.html#in-the-browser ,
+
+; here , https://stackoverflow.com/questions/58200373/how-to-append-child-to-react-element
+
+; and here https://legacy.reactjs.org/
