@@ -1,5 +1,5 @@
 (ns cas.views.cockpit
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cas.comps.equation]
             [cas.frontend.state :refer [tree-atom]]
             [cas.comps.problem-drawer :as pd]
@@ -12,18 +12,17 @@
 ;context experiment
 (rum/defcontext *context*)
 
-#_(rum/defc consumer []
+#_(defc consumer []
   (rum/with-context [n *context*]
     [:span n]))
-#_(rum/defc provider []
+#_(defc provider []
   (rum/bind-context [*context* 65]
                     (consumer)))
 
-(rum/defc cockpit-page < rum/reactive []
+(defc cockpit-page < rum/reactive []
   [:div.container
-   #_(top-bar/TopBar)
+   (top-bar/TopBar)
    [:div
     (cas.comps.equation/mathml-eqn tree-atom)]
    [:div (pdf/pdf-canvas)]
-   
-   [:div (pd/Problem-Drawer)]])
+   [:div "pd" (pd/Problem-Drawer)]])

@@ -1,5 +1,5 @@
 (ns cas.comps.main
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cas.lang-to.tex]
             [cljs.tools.reader.edn]
             [cas.frontend.tex-render]
@@ -12,7 +12,7 @@
 (def views [{:component tree-manip/tree-manip-harness :name "tree manipulation harness"}
             {:component board/backdrop :name "backdrop"}])
 
-(rum/defc main-comp < rum/reactive []
+(defc main-comp < rum/reactive []
   [:div {:height "100%"}
    [:div
     [:input {:type "button" :on-click state/advance! :value "Advance!"}]

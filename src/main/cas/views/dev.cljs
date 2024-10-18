@@ -1,7 +1,7 @@
 (ns cas.views.dev
   (:require
-   [rum.core :as rum]
+   [rum.core :as rum :refer-macros [defc]]
    cas.comps.main))
 
-(rum/defc dev-page []
+(defc dev-page []
   (cas.comps.main/main-comp))

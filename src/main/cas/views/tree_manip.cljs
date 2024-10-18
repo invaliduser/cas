@@ -1,16 +1,16 @@
 (ns cas.views.tree-manip
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cas.comps.microsoft-directory-tree :as ms-dir-tree]
             [cas.frontend.state :refer [mode tree-atom tex highlight-atom show-paths?]]
             [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.lang-to.mathml :refer [render-to-navigable-mathml]]
             [cas.comps.basics :as basics]))
 
-(rum/defc top-status < rum/reactive []
+(defc top-status < rum/reactive []
   [:div [:span {:on-click #(swap! show-paths? not)}
            (str "path" "(T)" ":" (rum/react highlight-atom))]])
 
-(rum/defc tree-manip-harness < rum/reactive []
+(defc tree-manip-harness < rum/reactive []
   [:div #_(top-status)
    [:hr]
    (ms-dir-tree/vertical-expr-tree tree-atom)

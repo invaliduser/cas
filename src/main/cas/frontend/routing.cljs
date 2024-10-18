@@ -1,37 +1,45 @@
 (ns cas.frontend.routing
   (:require [reitit.frontend.easy :as rfe]
-            [rum.core :as rum]
+            [rum.core :as rum :refer-macros [defc]]
             [reitit.frontend :as rf]
             [cas.views.cockpit]
             [cas.views.dev]
             [cas.views.tree-manip :as tree-manip]))
 
-(rum/defc placeholder []
+(defc placeholder []
   "hi there")
 
 (def current-view (atom placeholder))
 
-(rum/defc routing-component < rum/reactive []
-  (@current-view))
+(defc routing-component < rum/reactive []
+  ((rum/react current-view)))
 
 (def last-args (atom nil))
 
 (defn on-navigate-fn [match history]
+  (println "navigated!")
   (reset! last-args [match history])
   (reset! current-view (get-in match [:data :handler])))
 
-(rum/defc basic-component []
-  "basic component, reachable only by routing")
+(def basic-routes
+  [
+   ["/dev" {:handler cas.views.dev/dev-page :name :dev }]
+   ["/tree-manip" {:handler tree-manip/tree-manip-harness :name :tree-manip}]
+   ["/cockpit" {:handler cas.views.cockpit/cockpit-page :name :cockpit}]])
+
+(defc basic-component []
+  [:div (into [:ul]
+              (map (fn [route]
+                     [:li [:a {:on-click #(do
+                                            (println "clicked")
+                                            (rfe/navigate (get-in route [1 :name])))}
+                           (first route)]])
+                   basic-routes))])
 
 (def opts {:use-fragment false})
 (def routes
-  [["/" basic-component]
-   ["/dev" cas.views.dev/dev-page]
-   ["/tree-manip" tree-manip/tree-manip-harness]
-   ["/cockpit" cas.views.cockpit/cockpit-page]
-   
-
-])
+  (into [["/" basic-component]]
+        basic-routes))
 
 (def router (rf/router routes))
 

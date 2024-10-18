@@ -1,6 +1,6 @@
 (ns cas.frontend.keys
   (:require [goog.events :as events]
-            [rum.core :as rum]
+            [rum.core :as rum :refer-macros [defc]]
             [cljs.core.async :refer [chan <! >! go]]
             [cas.frontend.chans :refer [key-chan]]
             [cas.frontend.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer] :as state]
@@ -85,7 +85,7 @@
         (js/console.log (str k " pressed, no action associated..."))))))
 
 
-(rum/defc key-stream-display < rum/reactive []
+(defc key-stream-display < rum/reactive []
   [:div {:style {:text-align "center" :font-size 24} :on-click #(do
                                                                   (println "reset keystream")
                                                                   (reset! keystream []))}
@@ -97,7 +97,6 @@
 
 (def tokenizeable-keys "All keys that can be tokenized."
   (set (concat u-letters letters digit-strings operator-strings)))
-
 
 
 ;key handlers are like middleware, taking another handler

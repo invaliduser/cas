@@ -1,8 +1,7 @@
 (ns cas.comps.tex-display
-  (:require [rum.core])
-  )
+  (:require [rum.core :refer-macros [defc]]))
 
 
 
-(rum/defc full-tex-display < rum/reactive [tex-atom]
+(defc full-tex-display < rum/reactive [tex-atom]
   [:div {:dangerouslySetInnerHTML {:__html (.-outerHTML (render-tex (or (rum/react tex-atom) "")))}}])

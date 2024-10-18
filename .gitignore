@@ -3,3 +3,9 @@
 *.log
 node_modules
 target/*
+.nrepl-port
+.#*
+.*
+resources/public/*.pdf
+resources/public/*.aux
+resources/public/js/*

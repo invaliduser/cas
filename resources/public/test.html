@@ -1,0 +1,53 @@
+
+<!--<script type="text/javascript" src="js/tex-svg.js"></script>-->
+<!--<script type="text/javascript" src="js/math.min.js"></script>-->
+<!--$$a+b$$-->
+<html>
+  <head>
+
+    <script defer src="https://unpkg.com/mathlive"></script>
+
+  </head>
+  mathml:
+<math>
+  <mrow>
+    <mn>
+      5
+    </mn>
+    <mo>
+      +
+    </mo>
+    <mn>3</mn>
+</math>
+mathlive:
+
+<math-field read-only id="mf" >\frac{1}{2} + \frac{3}{4}</math-field>
+<button onClick="select_it()">select</button>
+
+
+    <script>
+      mf=document.getElementById('mf');
+      function select_it(){
+	  console.log("hi");
+	  mf.executeCommand("selectGroup");
+	  console.log(mf.selection);
+      }
+    </script>
+
+    <div>contentml:
+      <div>
+	<math>
+	  <apply>
+	    <plus/>
+	    <apply>
+	      <times/>
+	      <ci>a</ci>
+	      <ci>b</ci>
+	    </apply>
+	    5
+	  </apply>
+	</math>
+      </div>
+      </div>
+    
+</html>

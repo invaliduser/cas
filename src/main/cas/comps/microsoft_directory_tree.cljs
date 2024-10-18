@@ -1,5 +1,5 @@
 (ns cas.comps.microsoft-directory-tree
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.frontend.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path] :as state]
@@ -31,7 +31,7 @@
                                         ;:all
      (= node-path [:all]))))
 
-(rum/defc node-comp < rum/reactive [node path]
+(defc node-comp < rum/reactive [node path]
   ;current node-comp doesn't worry about children or even the node, neither will we
   #_[:div
    [:span "node: " (str node) ", "]
@@ -53,7 +53,7 @@
 
 ;we want to only call the above for operators, not vectors
 
-(rum/defc node-disp [node path] ;now *THIS* should take vectors, and everything else
+(defc node-disp [node path] ;now *THIS* should take vectors, and everything else
   (into [:div #_(str (if (vector? node)
                        (str "vector mode:" node)
                        (str "non-vector-mode:" node))
@@ -68,7 +68,7 @@
              (node-disp child p)))
          (children node))))
 
-(rum/defc vertical-expr-tree < rum/reactive [tree-atm]
+(defc vertical-expr-tree < rum/reactive [tree-atm]
   [:div
    [:div (str @tree-atm)]
    [:div (node-disp (first (rum/react tree-atm)) [0])]])
@@ -92,7 +92,7 @@
 
 ;-----the above two shouldn't exist.  when the below fns call `real-path`, they handle the ambiguity the `vector?` call is necessary for
 
-(defn dotota [f & args]
+(defn dotota [f & args] ;doto t.ree a.tom
   (apply swap! tree-atom f args ))
 
 (defn reset-at-path! [p v]

@@ -27,4 +27,4 @@ The ideal would be something that:
 ## Setup
 
 
-In dev, I've been running this with cider---`cider-jack-in-cljs`, `shadow`, `shadow`
+I've been starting with cider-jack-in-clj, then running (cljs) from user> in dev

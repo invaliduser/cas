@@ -1,15 +1,20 @@
 (ns cas.comps.pdf
-  (:require [rum.core :as rum]
-            [cljs.core.async :refer [go]]
-            [cljs.core.async.interop :refer-macros [<p!]]))
+  (:require  
+   [rum.core :as rum :refer-macros [defc]]
+   [cljs.core.async :refer [go]]
+   [cljs.core.async.interop :refer-macros [<p!]]))
+
 
 ;;trying two methods of pdf rendering:pdf.js, immediately below, and latex.js, below that
-;;
+;;another possibility is texlive, an emscriptem-ized version of pdflatex (so it runs in browser!) https://manuels.github.io/texlive.js/#open_pdf
 
 ;;the pdf.js version ---https://mozilla.github.io/pdf.js/examples/
 
-;possibly relevant: https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
-(rum/defc pdf-canvas []
+                                        ;possibly relevant: https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
+
+
+
+(defc pdf-canvas []
   (let [ref (rum/use-ref nil)]
     (rum/use-effect! #(.log js/console (rum/deref ref)))
     [:div
@@ -60,3 +65,12 @@
 ; here , https://stackoverflow.com/questions/58200373/how-to-append-child-to-react-element
 
 ; and here https://legacy.reactjs.org/
+
+; latex.js returns a dom node
+; strategy: get a ref to underlying node of react component, append to that
+
+#_(ns bla (:require
+         ["latex.js" :as ljs]))
+#_(defc latex-html5 []
+    [:div "ht5"])
+;shadow-cljs doesn't like the dynamic import in latex.js.  Might be possible to pack in ljs's deps beforehand with webpack:  https://code.thheller.com/blog/shadow-cljs/2020/05/08/how-about-webpack-now.html#option-2-js-provider-external

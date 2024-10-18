@@ -150,7 +150,7 @@
 (def selected-problem  (db-cursor 1 :selected-problem 0))
 
 (defonce tree-atom (arb-cursor {:read (fn [] (@problems @selected-problem))
-                                :write (fn [nv] (swap! problems assoc-in [@selected-problem :tree] nv))
+                                :write (fn [nv] (swap! problems assoc-in [@selected-problem] nv))
                                 :listener (atoms-listener [problems selected-problem])}))
 
 (defonce highlight-atom (arb-cursor {:read (fn [] (@highlights @selected-problem))

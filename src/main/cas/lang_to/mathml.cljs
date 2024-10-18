@@ -1,5 +1,5 @@
 (ns cas.lang-to.mathml
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.state :refer [highlight-atom tree-atom] :as state]
             [cas.frontend.tree-ops :refer [real-path children children? represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant vassoc]]))
 
@@ -65,7 +65,7 @@
 
 (rum/defcontext *context*)
 (declare render-item)
-(rum/defc parent-op-fn < rum/reactive [[kw & args] path each-node]
+(defc parent-op-fn < rum/reactive [[kw & args] path each-node]
 
   (let [f (fns kw)
         children (map-indexed (fn [idx item]
@@ -75,15 +75,15 @@
         node (f children path)]
     (each-node node path)))
 
-(rum/defc mo < rum/reactive [item path each-node]
+(defc mo < rum/reactive [item path each-node]
   (-> [:mo (non-parent-operators item)]
       (each-node path)))
 
-(rum/defc mn < rum/reactive [item path each-node]
+(defc mn < rum/reactive [item path each-node]
   (->  [:mn item]
        (each-node path)))
 
-(rum/defc mi < rum/reactive [item path each-node]
+(defc mi < rum/reactive [item path each-node]
   (-> [:mi item]
       (each-node path)))
 
@@ -132,11 +132,11 @@
                            "red")}))
 
 
-(rum/defc render-to-navigable-mathml [manipulang]
+(defc render-to-navigable-mathml [manipulang]
   [:math
    (render-item manipulang [0] (fn [node path] (-> node
                                                    (add-select-highlight path)
                                                    (add-click-to-set-path path)) ))])
 
-(rum/defc render-to-inert-mathml [manipulang]
+(defc render-to-inert-mathml [manipulang]
   [:math (render-item manipulang [0] (fn [node path] node))])

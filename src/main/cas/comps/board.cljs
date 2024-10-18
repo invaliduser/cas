@@ -1,5 +1,5 @@
 (ns ^:figwheel-always cas.comps.board
-  (:require [rum.core :as rum]
+  (:require [rum.core :as rum :refer-macros [defc]]
             [cljs.spec.alpha :as spec]
             [clojure.walk :as walk]
             [cas.comps.microsoft-directory-tree :as easy-tree]
@@ -10,10 +10,10 @@
             [cas.comps.basics :as basics]
             [react]))
 
-(rum/defc mode-indicator < rum/reactive []
+(defc mode-indicator < rum/reactive []
   [:span (str (rum/react mode) "-mode")])
 
-(rum/defc render-roadmap < rum/reactive []
+(defc render-roadmap < rum/reactive []
   [:div (for [k (keys atom-map)]
           [:div {:key (str k)}
            [:div [:label (str k)]]
@@ -25,7 +25,7 @@
 
 (def tholder (atom ""))
 
-(rum/defc backdrop < rum/reactive []
+(defc backdrop < rum/reactive []
   [:div
    
    (mode-indicator)

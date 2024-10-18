@@ -34,12 +34,12 @@
     (+ neg-idx? (count v))))
 
 (defn vassoc
-  "like assoc, but a) only for vectors, and b) takes negative integers as  indexes (-1 is last)"
+  "like assoc, but a) only for vectors, and b) takes negative integers as indexes (-1 is last)"
   [v idx nv]
   (assoc v (neg-idx v idx) nv))
 
 (defn vupdate
-  "like update, but a) only for vectors, and b) takes negative integers as  indexes (-1 is last)"
+  "like update, but a) only for vectors, and b) takes negative integers as indexes (-1 is last)"
   [v idx f & args]
   (apply update (neg-idx v idx) f args))
 
@@ -214,6 +214,7 @@
     (vreplace ve idx valu)))
 
 (defn delete-at [tree p]
+  (println p)
   (case (count p)
     1
     (remove-at-index tree (last p))

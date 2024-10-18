@@ -11,3 +11,5 @@
   (shadow-server/start!)
   (shadow/watch :app)
   (shadow/nrepl-select :app))
+
+(def stop! shadow-server/stop!)
