@@ -1,4 +1,4 @@
-(ns cas.views.tree-manip
+(ns cas.frontend.views.tree-manip
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.comps.path-tree :as ms-dir-tree]
             [cas.frontend.state :refer [mode tree-atom tex highlight-atom show-paths?]]

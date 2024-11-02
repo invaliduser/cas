@@ -1,4 +1,4 @@
-(ns cas.views.cockpit
+(ns cas.frontend.views.cockpit
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.comps.equation]
             [cas.frontend.state :refer [tree-atom]]

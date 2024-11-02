@@ -5,7 +5,7 @@
             [cas.frontend.tex-render]
             [cas.frontend.comps.basics :as basics]
             [cas.frontend.comps.board :as board]
-            [cas.views.tree-manip :as tree-manip]
+            [cas.frontend.views.tree-manip :as tree-manip]
             [cas.frontend.state :as state]
             [cas.shorthand :as sh]))
 

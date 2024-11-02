@@ -2,9 +2,9 @@
   (:require [reitit.frontend.easy :as rfe]
             [rum.core :as rum :refer-macros [defc]]
             [reitit.frontend :as rf]
-            [cas.views.cockpit]
-            [cas.views.dev]
-            [cas.views.tree-manip :as tree-manip]))
+            [cas.frontend.views.cockpit]
+            [cas.frontend.views.dev]
+            [cas.frontend.views.tree-manip :as tree-manip]))
 
 (defc placeholder []
   "hi there")
