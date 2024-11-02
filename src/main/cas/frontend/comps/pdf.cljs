@@ -1,4 +1,4 @@
-(ns cas.comps.pdf
+(ns cas.frontend.comps.pdf
   (:require  
    [rum.core :as rum :refer-macros [defc]]
    [cljs.core.async :refer [go]]

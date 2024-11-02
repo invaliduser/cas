@@ -1,13 +1,13 @@
-(ns ^:figwheel-always cas.comps.board
+(ns ^:figwheel-always cas.frontend.comps.board
   (:require [rum.core :as rum :refer-macros [defc]]
             [cljs.spec.alpha :as spec]
             [clojure.walk :as walk]
-            [cas.comps.microsoft-directory-tree :as easy-tree]
+            [cas.frontend.comps.path-tree :as easy-tree]
             [cas.frontend.tex-render :refer [render-tex]]
             [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.frontend.state :refer [mode tree-atom tex atom-map] :as state]
             [cas.frontend.keys :refer [key-stream-display]]
-            [cas.comps.basics :as basics]
+            [cas.frontend.comps.basics :as basics]
             [react]))
 
 (defc mode-indicator < rum/reactive []

@@ -1,10 +1,10 @@
-(ns cas.comps.main
+(ns cas.frontend.comps.main
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.lang-to.tex]
             [cljs.tools.reader.edn]
             [cas.frontend.tex-render]
-            [cas.comps.basics :as basics]
-            [cas.comps.board :as board]
+            [cas.frontend.comps.basics :as basics]
+            [cas.frontend.comps.board :as board]
             [cas.views.tree-manip :as tree-manip]
             [cas.frontend.state :as state]
             [cas.shorthand :as sh]))

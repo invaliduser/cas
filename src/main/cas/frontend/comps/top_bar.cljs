@@ -1,4 +1,4 @@
-(ns cas.comps.top-bar
+(ns cas.frontend.comps.top-bar
   (:require
    [rum.core :as rum :refer-macros [defc]]
    ["@mui/material" :as mui]))

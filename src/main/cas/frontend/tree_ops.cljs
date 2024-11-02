@@ -214,7 +214,6 @@
     (vreplace ve idx valu)))
 
 (defn delete-at [tree p]
-  (println p)
   (case (count p)
     1
     (remove-at-index tree (last p))
@@ -245,12 +244,13 @@
     (and (<= cp (count d))
          (let [lp (last p)
                md (d (dec cp))]    ;value at d at same index as lp
-           (and (= (remove-last p) (subvec d 0 (dec cp)))  ;everything but leaf mattches
+           (and (= (remove-last p) (subvec d 0 (dec cp)))  ;everything but leaf matches
                 (or (and (int? lp) ;leaf matches
                          (= lp md))
-                    (and (vector? lp)
+                    (and (vector? lp) ;md falls within range
                          (>= md (first lp))
-                         (< md (last lp)))))))))
+                         (< md (last lp)))
+                    (= :children lp)))))))
 ;this is correct, but could be made clearer
 
 

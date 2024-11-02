@@ -1,4 +1,4 @@
-(ns cas.comps.equation
+(ns cas.frontend.comps.equation
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.lang-to.mathml :refer [render-to-navigable-mathml]]))
 

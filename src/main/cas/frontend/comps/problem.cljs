@@ -1,4 +1,4 @@
-(ns cas.comps.problem
+(ns cas.frontend.comps.problem
   (:require [rum.core :as rum :refer-macros [defc]]
             ["@mui/material" :as mui]
             [cas.lang-to.mathml :refer [render-to-inert-mathml]]))

@@ -1,4 +1,4 @@
-(ns cas.comps.problem-drawer
+(ns cas.frontend.comps.problem-drawer
   (:require
    [rum.core :as rum :refer-macros [defc]]
    ["@mui/material" :as mui]

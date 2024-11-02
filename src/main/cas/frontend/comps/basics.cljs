@@ -1,4 +1,4 @@
-(ns cas.comps.basics
+(ns cas.frontend.comps.basics
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.tex-render :refer [render-tex]]))
 
