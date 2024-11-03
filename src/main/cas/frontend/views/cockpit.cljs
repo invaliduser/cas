@@ -23,6 +23,6 @@
   [:div.container
    (top-bar/TopBar)
    [:div
-    (cas.comps.equation/mathml-eqn tree-atom)]
+    (cas.frontend.comps.equation/mathml-eqn tree-atom)]
    [:div (pdf/pdf-canvas)]
    [:div "pd" (pd/Problem-Drawer)]])

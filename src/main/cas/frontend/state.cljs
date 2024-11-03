@@ -1,6 +1,6 @@
 (ns cas.frontend.state
   (:require [cas.lang-to.tex :refer [compile-to-tex]]
-            [cas.data :refer [over atom-> -notify INotifiable -cleanup-watches]]
+            [cas.common.data :refer [over atom-> -notify INotifiable -cleanup-watches]]
             [cas.frontend.nat :as nat]
             [cas.utils :refer [key-gen]]
             [datascript.core :as ds]

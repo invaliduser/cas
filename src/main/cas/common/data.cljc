@@ -1,4 +1,4 @@
-(ns cas.data
+(ns cas.common.data
   (:require [cas.utils :refer [key-gen]])
   #?(:cljs (:require-macros [cas.data :refer [atom->]])))
 

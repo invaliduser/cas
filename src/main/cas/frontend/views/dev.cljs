@@ -4,4 +4,4 @@
    cas.frontend.comps.main))
 
 (defc dev-page []
-  (cas.comps.main/main-comp))
+  (cas.frontend.comps.main/main-comp))

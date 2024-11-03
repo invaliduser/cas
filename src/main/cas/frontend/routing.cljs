@@ -23,9 +23,9 @@
 
 (def basic-routes
   [
-   ["/dev" {:handler cas.views.dev/dev-page :name :dev }]
+   ["/dev" {:handler cas.frontend.views.dev/dev-page :name :dev }]
    ["/tree-manip" {:handler tree-manip/tree-manip-harness :name :tree-manip}]
-   ["/cockpit" {:handler cas.views.cockpit/cockpit-page :name :cockpit}]])
+   ["/cockpit" {:handler cas.frontend.views.cockpit/cockpit-page :name :cockpit}]])
 
 (defc basic-component []
   [:div (into [:ul]

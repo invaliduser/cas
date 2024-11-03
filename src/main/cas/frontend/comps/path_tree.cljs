@@ -1,4 +1,4 @@
-(ns cas.comps.path-tree
+(ns cas.frontend.comps.path-tree
   (:require [rum.core :as rum :refer-macros [defc]]
             [cas.frontend.tex-render :refer [render-tex]]
             [cljs.core.async :refer [chan <! >! go-loop]]
