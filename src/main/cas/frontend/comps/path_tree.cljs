@@ -4,9 +4,7 @@
             [cljs.core.async :refer [chan <! >! go-loop]]
             [cas.frontend.state :refer [tree-atom highlight-atom show-paths? curr-value parent-path] :as state]
             [cas.frontend.tree-ops :refer [real-path children children? delete-at represents-fn? remove-last doto-last node-val nodal-descendant logical-descendant replace-last vassoc vget-in remove-range remove-at-index vremove vinsert vsplice] :as tree-ops]
-
-
-            [cas.shorthand :as sh]))
+            [cas.common.shorthand :as sh]))
 
 (defn matches-real-path? [np hp] ;[node-path highlight-path]; both are real-path
   (or (= np hp)  ;is highlighted directly and specifically

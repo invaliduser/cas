@@ -1,4 +1,4 @@
-(ns cas.shorthand)
+(ns cas.common.shorthand)
 
 ;macros for convenience
 (defmacro pull-in [libname fnsyms]

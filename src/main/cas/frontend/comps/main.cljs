@@ -7,7 +7,7 @@
             [cas.frontend.comps.board :as board]
             [cas.frontend.views.tree-manip :as tree-manip]
             [cas.frontend.state :as state]
-            [cas.shorthand :as sh]))
+            [cas.common.shorthand :as sh]))
 
 (def views [{:component tree-manip/tree-manip-harness :name "tree manipulation harness"}
             {:component board/backdrop :name "backdrop"}])

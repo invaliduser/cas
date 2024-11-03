@@ -6,7 +6,7 @@
             [cas.frontend.state :refer [mode highlight-atom tree-atom keystream keystream-undecided last-key keylang-input write-buffer] :as state]
             [cas.frontend.nat :refer [full]]
             [cas.utils :refer [letters u-letters digit-strings operator-strings text-edit!-keys]]
-            [cas.shorthand :as sh])
+            [cas.common.shorthand :as sh])
   (:import [goog.events KeyHandler]
            [goog.events.EventType]))
 
