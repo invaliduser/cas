@@ -3,7 +3,8 @@
             [cas.frontend.comps.main]
             [cas.frontend.keys :refer [refresh-listeners]]
             [cas.frontend.routing :as routing]
-            [cas.frontend.actions :as actions]))
+            [cas.frontend.actions :as actions]
+            [cas.frontend.comps.pdf :as pdf]))
 
 
 (set! *warn-on-infer* true)
@@ -23,6 +24,7 @@
 (defn init! []
   (routing/start!)
   (actions/init-actions!)
+  (pdf/start-render-loop!)
   (rum/mount
    #_(cas.comps.main/main-comp)
    (routing/routing-component)

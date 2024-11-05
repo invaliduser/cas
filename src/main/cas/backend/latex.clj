@@ -2,7 +2,7 @@
   (:require
    [clojure.java.shell :as sh]
    [clojure.java.io :as io]
-   
+   [clojure.core.async :as async :refer [go timeout <!]]
    [ring.util.response]
    [cas.common.latex :as comtex]))
 
@@ -27,12 +27,20 @@
     (sh/sh "pdflatex"  "-output-directory" dest-dir tex-fname)
     
     (println "target-name:" target-name)
+
+    (go (<! (timeout 60000))
+        (sh/sh "rm"  (str dest-dir "/" fname ".*")))
     target-name))
+
+(def h (atom []))
 
 (defn tex-pdf-route [req]
   (let [target-name (-> req
-                  :body-params
-                  (#(assoc {} :tex-str %))
-                  (to-pdf))]
-  {:status 200
-   :body (io/input-stream target-name)})) 
+                        :body-params
+                        :tex
+                        (#(assoc {} :tex-str %))
+                        (to-pdf))
+        res {:status 200
+             :body (io/input-stream target-name)}]
+    (swap! h conj {:in (-> req :body-params) :out [target-name res]})
+    res)) 

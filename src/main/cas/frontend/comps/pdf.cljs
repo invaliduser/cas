@@ -1,7 +1,8 @@
 (ns cas.frontend.comps.pdf
   (:require  
+   [cas.frontend.chans :refer [pdf-chan]]
    [rum.core :as rum :refer-macros [defc]]
-   [cljs.core.async :refer [go]]
+   [cljs.core.async :refer [go go-loop <!]]
    [cljs.core.async.interop :refer-macros [<p!]]))
 
 
@@ -11,7 +12,6 @@
 ;;the pdf.js version ---https://mozilla.github.io/pdf.js/examples/
 
                                         ;possibly relevant: https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
-
 
 
 (defc pdf-canvas []
@@ -30,33 +30,46 @@
 (defn get-page-viewport [page m]
   (.getViewport ^js page m))
 
-(defn render-pdf [url] ;this will obv not scale if it's routebased lel
-  (let [loading-task (.getDocument  js/pdfjsLib "ok.pdf")]
+
+(defn render-page! [page]
+  (let [scale 1.5
+        viewport (get-page-viewport page #js {:scale scale})
+        output-scale (or (.-devicePixelRatio js/window) 1)
+        canvas (.getElementById js/document "canvas")
+        _ (set! (.-width canvas)  (.floor js/Math (* output-scale (.-width viewport))))
+        _ (set! (.-height canvas) (.floor js/Math (* output-scale (.-height viewport))))
+        #_#_            _ (set! (.. canvas -style -width)  (.floor js/Math (str (.-width viewport) "px")))
+        #_#_            _ (set! (.. canvas -style -height) (.floor js/Math (str (.-height viewport) "px")))
+
+        _ (set! (.-width (.-style canvas))  (.floor js/Math (str (.-width viewport) "px")))
+        _ (set! (.-height (.-style canvas)) (.floor js/Math (str (.-height viewport) "px")))
+
+        context (.getContext canvas "2d")
+
+        transform (if (not= output-scale 1)
+                    #js [output-scale 0 0 output-scale 0 0]
+                    nil)
+
+        render-context #js {:canvasContext context
+                            :transform transform
+                            :viewport viewport}]
+    (.render page render-context)))
+
+
+
+(defn render-pdf [src] ;url, or array
+  (let [loading-task (.getDocument js/pdfjsLib src)]
     (go
       (let [pdf (<p! (get-pdf-promise loading-task))
-            page  (<p! (get-pdf-page-promise pdf))
-            scale 1.5
-            viewport (get-page-viewport page #js {:scale scale})
-            output-scale (or (.-devicePixelRatio js/window) 1)
-            canvas (.getElementById js/document "canvas")
-            _ (set! (.-width canvas)  (.floor js/Math (* output-scale (.-width viewport))))
-            _ (set! (.-height canvas) (.floor js/Math (* output-scale (.-height viewport))))
-#_#_            _ (set! (.. canvas -style -width)  (.floor js/Math (str (.-width viewport) "px")))
-#_#_            _ (set! (.. canvas -style -height) (.floor js/Math (str (.-height viewport) "px")))
+            page  (<p! (get-pdf-page-promise pdf))]
+        (render-page! page)))))
 
-            _ (set! (.-width (.-style canvas))  (.floor js/Math (str (.-width viewport) "px")))
-            _ (set! (.-height (.-style canvas)) (.floor js/Math (str (.-height viewport) "px")))
 
-            context (.getContext canvas "2d")
+(defn start-render-loop! []
+  (println "starting pdf-renderloop!")
+  (go-loop []
+    (render-pdf (<! pdf-chan))))
 
-            transform (if (not= output-scale 1)
-                        #js [output-scale 0 0 output-scale 0 0]
-                        nil)
-
-            render-context #js {:canvasContext context
-                                :transform transform
-                                :viewport viewport}]
-        (.render page render-context)))))
 
 ;;the latex.js version
 
