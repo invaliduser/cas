@@ -40,3 +40,6 @@ left: dec last
 * comps (board, bench, tree-manipulation)
 ** bench is for one-off components a la devcards
 ** 
+* todo
+** pdf
+*** change backend so a single route can receive a text string, maek pdf, and return pdf

@@ -1,5 +1,5 @@
 (ns cas.common.data
-  (:require [cas.utils :refer [key-gen]])
+  (:require [cas.common.utils :refer [key-gen]])
   #?(:cljs (:require-macros [cas.common.data :refer [atom->]])))
 
 (defprotocol INotifiable

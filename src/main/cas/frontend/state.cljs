@@ -2,7 +2,7 @@
   (:require [cas.lang-to.tex :refer [compile-to-tex]]
             [cas.common.data :refer [over atom-> -notify INotifiable -cleanup-watches]]
             [cas.frontend.nat :as nat]
-            [cas.utils :refer [key-gen]]
+            [cas.common.utils :refer [key-gen]]
             [datascript.core :as ds]
             [cas.frontend.test-data :as test-data]
             [cas.frontend.tree-ops :refer [vget-in remove-last]]
