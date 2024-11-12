@@ -27,6 +27,6 @@ The ideal would be something that:
 ## Setup
 
 
-I've been starting with `cider-jack-in-clj`, then running `(cljs)` from `user>` in dev
+I've been starting with `cider-jack-in-clj`, then running `(cljs)` from `user>` in dev, then opening `localhost:8080`
 
 (You'll need to run `npm install`)
